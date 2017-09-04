@@ -1,17 +1,20 @@
+/*极客学院前端组*/
 .slots-container {
   width: 384px;
   height: 640px;
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
   background: url('../image/bg.jpg') center no-repeat;
 }
 .slots-container-btn {
   position: absolute;
   top: 479px;
   left: 50%;
-  transform: translate(-50%, 0);
+  -webkit-transform: translate(-50%, 0);
+          transform: translate(-50%, 0);
   width: 100px;
   height: 60px;
   cursor: pointer;
@@ -25,7 +28,8 @@
   position: absolute;
   top: 130px;
   left: 50%;
-  transform: translate(-50%, 0);
+  -webkit-transform: translate(-50%, 0);
+          transform: translate(-50%, 0);
   border-radius: 3px;
   overflow: hidden;
   background: -webkit-linear-gradient(top, #2d2d2d 0, #fff 50%, #2d2d2d 100%);
