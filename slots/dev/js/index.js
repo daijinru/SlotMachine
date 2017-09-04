@@ -11,18 +11,6 @@
 */ 
 class Animate {
     constructor(dom) {
-        // 实例化检验类
-        this.validate = new VALIDATE({
-            property    : 'string.isRequired',
-            startPos    : 'number.isRequired',
-            endPos      : 'number.isRequired',
-            duration    : 'number.isRequired',
-            easing      : 'string.isRequired',
-            callback    : 'function.notRequired',
-            dom         : 'object.isRequired'
-        })
-        this.validate.start({dom});          // 检验动画对象
-
         this.dom            = dom;           // 动画对象
         this.startTime      = 0;             // 动画开始时间
         this.startPos       = 0;             // 动画开始位置
@@ -33,9 +21,6 @@ class Animate {
     }
 
     run(property, startPos, endPos, duration, easing, callback) {
-        // 检验参数
-        this.validate.start({property,startPos,endPos,duration,easing,callback});
-
         this.property       = property;                     // 初始化动画属性
         this.startPos       = startPos;                     // 初始化动画开始位置
         this.endPos         = endPos;                       // 初始化动画结束位置
@@ -51,7 +36,7 @@ class Animate {
                 // 清除定时器
                 clearInterval(timeId);
                 // 执行回调函数
-                callback && callback();
+                callback && typeof callback === 'function' && callback();
             }
             // 每隔20毫秒执行 _step() 方法，如果时间越大，则动画帧数越小，因此不宜过大
             this._step();
@@ -126,26 +111,6 @@ class Animate {
 */ 
 class Game {
     constructor(obj) {
-
-        // 实例化检验类
-        this.validate = new VALIDATE({
-            obj         : 'object.isRequired',
-            property    : 'string.isRequired',
-            startPos    : 'number.isRequired',
-            endPos      : 'number.isRequired',
-            dom         : 'object.isRequired',
-            targetPos   : 'number.isRequired',
-            callback    : 'function.notRequired'
-        })
-        // 检验参数
-        this.validate.start({
-            obj         : obj,
-            dom         : obj['dom'],
-            property    : obj['property'],
-            startPos    : obj['startPos'],
-            endPos      : obj['endPos']
-        })
-
         this.counter            = 0;                                        // 初始化计数器
         this.dom                = obj['dom'];                               // 初始化动画对象
         this.property           = obj['property'];                          // 初始化动画属性
@@ -158,8 +123,6 @@ class Game {
     }
 
     run(targetPos,callback) {
-        // 检查参数
-        this.validate.start({targetPos,callback});
         // 实例化 Animate 类并传入动画对象
         const animate = new Animate(this.dom);
         // 执行动画
@@ -173,7 +136,7 @@ class Game {
                 // 在最后一次动画循环中移动动画对象到结束位置
                 animate.run(this.property, this.startPos, targetPos, 800, 'easeOut');
                 // 执行回调函数
-                if (callback) {
+                if (callback && typeof callback === 'function') {
                     setTimeout(() => {
                         callback();
                     },1500)
@@ -199,18 +162,22 @@ class VALIDATE {
     start(state) {
         //遍历校验规则
         Object.getOwnPropertyNames(state).forEach(val => {                              
-            let stateType  = typeof state[val];                                         //当前类型
-            let propsType  = this.params[val].split('.')[0];                            //规则类型
-            let required   = this.params[val].split('.')[1];                            //规则参数是否必传
-            let isRequired = required  === 'isRequired'           ? true : false;       //验证当前参数是否必传
-            let isPropType = propsType === typeof state[val] ? true : false;            //验证当前类型与规则类型是否相等
-            let errorType  = `${val} type should be ${propsType} but ${stateType}`;     //类型错误抛出异常值
-            let errorIsQu  = `${val} isRequired!'`;                                     //必传参数抛出类型异常值
-            //如果为必传参数但是没有传值
+            let stateType  = typeof state[val];                                         // 当前类型
+            let propsType  = this.params[val].split('.')[0];                            // 规则类型
+            let required   = this.params[val].split('.')[1];                            // 规则参数是否必传
+            let isRequired = required  === 'isRequired'           ? true : false;       // 验证当前参数是否必传
+            let isPropType = propsType === typeof state[val] ? true : false;            // 验证当前类型与规则类型是否相等
+            let errorType  = `${val} type should be ${propsType} but ${stateType}`;     // 类型错误抛出异常值
+            let errorIsQu  = `${val} isRequired!'`;                                     // 必传参数抛出类型异常值
+            // 如果该参数不存在，则跳过
+            if (!val) {
+                return
+            }
+            // 如果为必传参数但是没有传值
             if(isRequired  && !state[val]){                                    
                 throw new Error (errorIsQu);
             }
-            //如果当前类型与规则类型不等
+            // 如果当前类型与规则类型不等
             if(!isPropType && state[val]){  
                 throw new Error (errorType);
             }
@@ -223,7 +190,6 @@ class VALIDATE {
 */ 
 class App {
     constructor(params) {
-
         // 实例化检验类
         this.validate = new VALIDATE({
             params          : 'object.isRequired',
@@ -231,6 +197,9 @@ class App {
             property        : 'string.isRequired',
             startPos        : 'number.isRequired',
             endPos          : 'number.isRequired',
+            duration        : 'number.notRequired',
+            easing          : 'string.notRequired',
+            counts          : 'number.notRequired',
             targetPosArray  : 'object.isRequired',
             callback        : 'function.notRequired',
         })
@@ -242,9 +211,12 @@ class App {
                 property    : item['property'],
                 startPos    : item['startPos'],
                 endPos      : item['endPos'],
+                duration    : item['duration'],
+                easing      : item['easing'],
+                counts      : item['counts']
             })
         })
-        
+
         this.params = params; // 初始化参数
         this.game   = [];     // 初始化 game 数组
         this._gameInstance(); 

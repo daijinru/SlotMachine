@@ -22,18 +22,6 @@ var Animate = function () {
     function Animate(dom) {
         _classCallCheck(this, Animate);
 
-        // 实例化检验类
-        this.validate = new VALIDATE({
-            property: 'string.isRequired',
-            startPos: 'number.isRequired',
-            endPos: 'number.isRequired',
-            duration: 'number.isRequired',
-            easing: 'string.isRequired',
-            callback: 'function.notRequired',
-            dom: 'object.isRequired'
-        });
-        this.validate.start({ dom: dom }); // 检验动画对象
-
         this.dom = dom; // 动画对象
         this.startTime = 0; // 动画开始时间
         this.startPos = 0; // 动画开始位置
@@ -47,9 +35,6 @@ var Animate = function () {
         key: 'run',
         value: function run(property, startPos, endPos, duration, easing, callback) {
             var _this = this;
-
-            // 检验参数
-            this.validate.start({ property: property, startPos: startPos, endPos: endPos, duration: duration, easing: easing, callback: callback });
 
             this.property = property; // 初始化动画属性
             this.startPos = startPos; // 初始化动画开始位置
@@ -66,7 +51,7 @@ var Animate = function () {
                     // 清除定时器
                     clearInterval(timeId);
                     // 执行回调函数
-                    callback && callback();
+                    callback && typeof callback === 'function' && callback();
                 }
                 // 每隔20毫秒执行 _step() 方法，如果时间越大，则动画帧数越小，因此不宜过大
                 _this._step();
@@ -151,25 +136,6 @@ var Game = function () {
     function Game(obj) {
         _classCallCheck(this, Game);
 
-        // 实例化检验类
-        this.validate = new VALIDATE({
-            obj: 'object.isRequired',
-            property: 'string.isRequired',
-            startPos: 'number.isRequired',
-            endPos: 'number.isRequired',
-            dom: 'object.isRequired',
-            targetPos: 'number.isRequired',
-            callback: 'function.notRequired'
-        });
-        // 检验参数
-        this.validate.start({
-            obj: obj,
-            dom: obj['dom'],
-            property: obj['property'],
-            startPos: obj['startPos'],
-            endPos: obj['endPos']
-        });
-
         this.counter = 0; // 初始化计数器
         this.dom = obj['dom']; // 初始化动画对象
         this.property = obj['property']; // 初始化动画属性
@@ -186,8 +152,6 @@ var Game = function () {
         value: function run(targetPos, callback) {
             var _this2 = this;
 
-            // 检查参数
-            this.validate.start({ targetPos: targetPos, callback: callback });
             // 实例化 Animate 类并传入动画对象
             var animate = new Animate(this.dom);
             // 执行动画
@@ -201,7 +165,7 @@ var Game = function () {
                     // 在最后一次动画循环中移动动画对象到结束位置
                     animate.run(_this2.property, _this2.startPos, targetPos, 800, 'easeOut');
                     // 执行回调函数
-                    if (callback) {
+                    if (callback && typeof callback === 'function') {
                         setTimeout(function () {
                             callback();
                         }, 1500);
@@ -236,18 +200,22 @@ var VALIDATE = function () {
 
             //遍历校验规则
             Object.getOwnPropertyNames(state).forEach(function (val) {
-                var stateType = _typeof(state[val]); //当前类型
-                var propsType = _this3.params[val].split('.')[0]; //规则类型
-                var required = _this3.params[val].split('.')[1]; //规则参数是否必传
-                var isRequired = required === 'isRequired' ? true : false; //验证当前参数是否必传
-                var isPropType = propsType === _typeof(state[val]) ? true : false; //验证当前类型与规则类型是否相等
-                var errorType = val + ' type should be ' + propsType + ' but ' + stateType; //类型错误抛出异常值
-                var errorIsQu = val + ' isRequired!\''; //必传参数抛出类型异常值
-                //如果为必传参数但是没有传值
+                var stateType = _typeof(state[val]); // 当前类型
+                var propsType = _this3.params[val].split('.')[0]; // 规则类型
+                var required = _this3.params[val].split('.')[1]; // 规则参数是否必传
+                var isRequired = required === 'isRequired' ? true : false; // 验证当前参数是否必传
+                var isPropType = propsType === _typeof(state[val]) ? true : false; // 验证当前类型与规则类型是否相等
+                var errorType = val + ' type should be ' + propsType + ' but ' + stateType; // 类型错误抛出异常值
+                var errorIsQu = val + ' isRequired!\''; // 必传参数抛出类型异常值
+                // 如果该参数不存在，则跳过
+                if (!val) {
+                    return;
+                }
+                // 如果为必传参数但是没有传值
                 if (isRequired && !state[val]) {
                     throw new Error(errorIsQu);
                 }
-                //如果当前类型与规则类型不等
+                // 如果当前类型与规则类型不等
                 if (!isPropType && state[val]) {
                     throw new Error(errorType);
                 }
@@ -276,6 +244,9 @@ var App = function () {
             property: 'string.isRequired',
             startPos: 'number.isRequired',
             endPos: 'number.isRequired',
+            duration: 'number.notRequired',
+            easing: 'string.notRequired',
+            counts: 'number.notRequired',
             targetPosArray: 'object.isRequired',
             callback: 'function.notRequired'
         });
@@ -286,7 +257,10 @@ var App = function () {
                 dom: item['dom'],
                 property: item['property'],
                 startPos: item['startPos'],
-                endPos: item['endPos']
+                endPos: item['endPos'],
+                duration: item['duration'],
+                easing: item['easing'],
+                counts: item['counts']
             });
         });
 
