@@ -11,6 +11,18 @@
 */ 
 class Animate {
     constructor(dom) {
+        // 实例化检验类
+        this.validate = new VALIDATE({
+            property    : 'string.isRequired',
+            startPos    : 'number.isRequired',
+            endPos      : 'number.isRequired',
+            duration    : 'number.isRequired',
+            easing      : 'string.isRequired',
+            callback    : 'function.notRequired',
+            dom         : 'object.isRequired'
+        })
+        this.validate.start({dom});          // 检验动画对象
+
         this.dom            = dom;           // 动画对象
         this.startTime      = 0;             // 动画开始时间
         this.startPos       = 0;             // 动画开始位置
@@ -21,6 +33,8 @@ class Animate {
     }
 
     run(property, startPos, endPos, duration, easing, callback) {
+        // 检验参数
+        this.validate.start({property,startPos,endPos,duration,easing,callback});
 
         this.property       = property;                     // 初始化动画属性
         this.startPos       = startPos;                     // 初始化动画开始位置
@@ -112,16 +126,25 @@ class Animate {
 */ 
 class Game {
     constructor(obj) {
-        // 如果 obj 参数不是一个对象，打印错误
-        if (typeof obj !== 'object') { 
-            console.error('参数错误');
-            return false;
-        }
-        // 检查必要参数
-        if (!obj['dom'] && !obj['property'] && obj['startPos'] && obj['endPos']) {
-            console.error('缺乏必要参数')
-            return false;
-        }
+
+        // 实例化检验类
+        this.validate = new VALIDATE({
+            obj         : 'object.isRequired',
+            property    : 'string.isRequired',
+            startPos    : 'number.isRequired',
+            endPos      : 'number.isRequired',
+            dom         : 'object.isRequired',
+            targetPos   : 'number.isRequired',
+            callback    : 'function.notRequired'
+        })
+        // 检验参数
+        this.validate.start({
+            obj         : obj,
+            dom         : obj['dom'],
+            property    : obj['property'],
+            startPos    : obj['startPos'],
+            endPos      : obj['endPos']
+        })
 
         this.counter            = 0;                                        // 初始化计数器
         this.dom                = obj['dom'];                               // 初始化动画对象
@@ -136,13 +159,7 @@ class Game {
 
     run(targetPos,callback) {
         // 检查参数
-        if (!targetPos) {
-            console.error('缺乏必要参数')
-            return false;
-        }
-        if (callback && typeof callback !== 'function') {
-            console.error('参数类型错误');
-        }
+        this.validate.start({targetPos,callback});
         // 实例化 Animate 类并传入动画对象
         const animate = new Animate(this.dom);
         // 执行动画
@@ -171,24 +188,71 @@ class Game {
     }
 }
 
+/* 校验类
+*/ 
+
+class VALIDATE {
+    constructor(params) {
+        this.params = params;
+    }
+
+    start(state) {
+        Object.getOwnPropertyNames(state).forEach((val, key, array) => {      //遍历校验规则
+            let stateType  = typeof state[val];                                //当前类型
+            let propsType  = this.params[val].split('.')[0];                          //规则类型
+            let required   = this.params[val].split('.')[1];                          //规则参数是否必传
+            let isRequired = required  === 'isRequired'           ? true : false;   //验证当前参数是否必传
+            let isPropType = propsType === typeof state[val] ? true : false;   //验证当前类型与规则类型是否相等
+            let errorType  = `${val} type should be ${propsType} but ${stateType}`; //类型错误抛出异常值
+            let errorIsQu  = `${val} isRequired!'`;                                 //必传参数抛出类型异常值
+            //如果为必传参数但是没有传值
+            if(isRequired  && !state[val]){                                    
+                throw new Error (errorIsQu);
+            }
+            //如果当前类型与规则类型不等
+            if(!isPropType && state[val]){  
+                throw new Error (errorType);
+            }
+        });
+    }
+}
+
 /* App 类初始化动画执行的具体参数，封装调用动画的行为
 ** run() 方法是 App 类的开放接口，接受动画最终循环的结束位置和回调函数
 */ 
 class App {
     constructor(params) {
 
-        try {
-            if (!params) throw new Error('params 对象缺失');
-        } catch(error) {
-            alert(error);
-        }
-
+        // 实例化检验类
+        this.validate = new VALIDATE({
+            params          : 'object.isRequired',
+            dom             : 'object.isRequired',
+            property        : 'string.isRequired',
+            startPos        : 'number.isRequired',
+            endPos          : 'number.isRequired',
+            targetPosArray  : 'object.isRequired',
+            callback        : 'function.notRequired',
+        })
+        // 检查参数
+        params.forEach(item => {
+            this.validate.start({
+                params      : item,
+                dom         : item['dom'],
+                property    : item['property'],
+                startPos    : item['startPos'],
+                endPos      : item['endPos'],
+            })
+        })
+        
         this.params = params; // 初始化参数
         this.game   = [];     // 初始化 game 数组
         this._gameInstance(); 
     }
 
     run(targetPosArray,callback) {
+        // 检查参数
+        this.validate.start({targetPosArray,callback});
+        // 遍历 game 数组
         this.game.forEach((item, index) => {
             // 执行最后一个对象的动画的时候，传入回调
             if (index === (targetPosArray.length - 1)) {
@@ -210,7 +274,8 @@ class App {
     }
 }
 
-/* 实例化 App类，每一个实例都传入相关参数
+/* 我们来模拟一次吧！
+** 实例化 App类，每一个实例都传入相关参数
 ** 通过点击事件触发 App 实例的 run() 方法
 */
 const app = new App([{
