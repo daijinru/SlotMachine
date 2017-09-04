@@ -1,22 +1,22 @@
 import Tween from './Tween.js';
 
-// Animate 动画
+// 动画方法
 class Animate {
     constructor(dom) {
         this.dom            = dom; // 运动节点
         this.startTime      = 0; // 动画开始时间
         this.startPos       = 0; // 动画开始位置
         this.endPos         = 0; // 节点目标位置
-        this.property       = null; // 节点 style 属性名
+        this.property       = null; // 动画属性
         this.easing         = null; // 动画速度曲线
         this.duration       = null; // 持续时间
     }
 
     start(property, startPos, endPos, duration, easing, callback) {
 
-        this.property       = property; // dom节点被改变的css属性名
-        this.startPos       = startPos; // 获取dom节点初始位置
-        this.endPos         = endPos; // dom节点目标位置
+        this.property       = property; // 动画属性
+        this.startPos       = startPos; // 获取 dom 节点初始位置
+        this.endPos         = endPos; // dom 节点目标位置
 
         this.startTime      = new Date().getTime(); // 动画启动时间
         this.duration       = duration; // 动画持续时间
@@ -25,9 +25,9 @@ class Animate {
         const timeId = setInterval(() => { // 启动定时器
             if (this.step() === false) { // 如果动画结束，清除定时器
                 clearInterval(timeId); // 清除定时器
-                callback && callback(); // 执行回调函数
+                callback && callback(); // 如果有回调函数，则执行回调函数
             }
-            // 每隔20秒执行 step() 函数
+            // 每隔20毫秒执行 step() 函数，如果时间越大，则动画帧数越小
             this.step();
         }, 20);
     }
@@ -41,15 +41,15 @@ class Animate {
         }
 
         const pos = this.easing(t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration); // 执行动画函数
-        this.update(pos); // 更新dom节点位置
+        this.update(pos); // 更新 dom 节点位置
     }
 
     update(pos) {
-        this.dom.style[this.property] = pos + 'px'; // 修改dom节点相应属性值
+        this.dom.style[this.property] = pos + 'px'; // 修改 dom 节点相应属性值
     }
 }
 
-// 执行动画方法
+// 设定动画方法的执行
 class Game {
     constructor(obj) {
 
@@ -58,7 +58,7 @@ class Game {
             console.error('参数错误');
             return false;
         }
-        // 对必要参数进行检查
+        // 检查必要参数
         if (!obj['dom'] && !obj['property'] && obj['startPos'] && obj['endPos']) {
             console.error('缺乏必要参数')
             return false;
@@ -72,14 +72,18 @@ class Game {
 
         this.duration           = obj['duration'] ? obj['duration'] : 500; // 动画持续时间，默认值为 500s
         this.easing             = obj['easing'] ? obj['easing'] : 'linear'; // 动画速度曲线，默认值为 linear
-        this.targetPos          = obj['targetPos'] ? obj['targetPos'] : obj['startPos']; // 动画执行到最后一个循环后停止到指定位置，默认值为 0
         this.counts             = obj['counts'] ? obj['counts'] : 10; // 动画循环次数，默认值为 10
-
-        this.callback           = obj['callback'] ? obj['callback'] : void(0); // 初始化回调
     }
 
-    run() {
-        // 计时器清零
+    run(targetPos,callback) {
+        // 检查参数
+        if (!targetPos) {
+            console.error('缺乏必要参数')
+            return false;
+        }
+        if (callback && typeof callback !== 'function') {
+            console.error('参数类型错误');
+        }
         const animate = new Animate(this.dom);
         // 执行动画
         animate.start(this.property, this.startPos, this.endPos, this.duration, this.easing, () => {
@@ -90,20 +94,21 @@ class Game {
                 // 计时器清零
                 this.counter = 0;
                 // 在最后一次动画循环中将移动目标节点到指定位置
-                animate.start(this.property, this.startPos, this.targetPos, 800, 'easeOut');
+                animate.start(this.property, this.startPos, targetPos, 800, 'easeOut');
                 // 执行回调
-                if (this.callback) {
+                if (callback) {
                     setTimeout(() => {
-                        this.callback();
-                    },1500)
+                        callback();
+                    },1200)
                 }
                 return false;
             };
-            // 执行动画循环
+            // 执行动画循环，将动画对象的位置重置到初始状态
             this.dom.style[this.property] = this.startPos + 'px';
-            this.run();
+            this.run(targetPos,callback);
         })
     }
 }
 
+// 导出 Game 模块
 export default Game

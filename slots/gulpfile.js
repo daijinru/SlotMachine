@@ -1,5 +1,4 @@
 const gulp = require('gulp');
-const webpack = require('gulp-webpack');
 
 // less 编译
 const less = require('gulp-less');

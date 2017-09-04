@@ -76,55 +76,75 @@ var _Animate2 = _interopRequireDefault(_Animate);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// APP
+// 引入 Game 模块
 
-var params = [{
-    dom: document.getElementsByClassName('superheros-list01')[0], // 动画对象，必须
-    property: 'top', // 动画属性，必须
-    startPos: -65, // 动画开始位置，必须
-    endPos: -1100, // 动画终止的位置，必须
-    duration: 500, // 动画持续时间
-    easing: 'linear', // 动画速率
-    counts: 5, // 动画循环次数
-    targetPos: -415
-}, {
-    dom: document.getElementsByClassName('superheros-list02')[0], // 动画对象，必须
-    property: 'top', // 动画属性，必须
-    startPos: -65, // 动画开始位置，必须
-    endPos: -1100, // 动画终止的位置，必须
-    duration: 500, // 动画持续时间
-    easing: 'linear', // 动画速率
-    counts: 6, // 动画循环次数
-    targetPos: -415
-}, {
-    dom: document.getElementsByClassName('superheros-list03')[0], // 动画对象，必须
-    property: 'top', // 动画属性，必须
-    startPos: -65, // 动画开始位置，必须
-    endPos: -1100, // 动画终止的位置，必须
-    duration: 500, // 动画持续时间
-    easing: 'linear', // 动画速率
-    counts: 7, // 动画循环次数
-    targetPos: -525,
-    callback: function callback() {
-        console.log('hello');
-    }
-}];
+// 调用代码
+var APP = {
+    // 模拟数据
+    source: {
+        prizeResultArray: [-170, -500, -500] // 每个抽奖结果之间距离 110，最小值 -60，最大值 -1150
+    },
+    params: [{
+        dom: document.getElementsByClassName('superheros-list01')[0], // 动画对象，必须
+        property: 'top', // 动画属性，必需
+        startPos: -60, // 动画开始位置，必需
+        endPos: -1050, // 动画终止的位置，必需
+        duration: 500, // 动画持续时间，非必需
+        easing: 'linear', // 动画速率，非必需
+        counts: 5 // 动画循环次数，非必需
+    }, {
+        dom: document.getElementsByClassName('superheros-list02')[0], // 动画对象，必须
+        property: 'top',
+        startPos: -60,
+        endPos: -1050,
+        duration: 500,
+        easing: 'linear',
+        counts: 6
+    }, {
+        dom: document.getElementsByClassName('superheros-list03')[0], // 动画对象，必须
+        property: 'top',
+        startPos: -60,
+        endPos: -1050,
+        duration: 500,
+        easing: 'linear',
+        counts: 7
+    }],
+    // 初始化
+    init: function init() {
+        this.bindEventFn();
+        this.gameInstance();
+    },
+    game: [],
+    // 抽奖实例
+    gameInstance: function gameInstance() {
+        var _this = this;
 
-var App = function App(params) {
-    var game = [];
-
-    params.forEach(function (item, index) {
-        game[index] = new _Animate2.default(item);
-    });
-
-    document.getElementById('start').addEventListener('click', function () {
-        game.forEach(function (item) {
-            item.run();
+        // 声明 game 数组，并将 Game 的实例化按顺序压入 game 数组
+        this.params.forEach(function (item, index) {
+            _this.game[index] = new _Animate2.default(item);
         });
-    });
+    },
+    // 点击事件绑定
+    bindEventFn: function bindEventFn() {
+        // 在点击事件中逐个执行 game 数组里的方法
+        document.getElementById('start').addEventListener('click', this.slotRunFn);
+    },
+    slotRunFn: function slotRunFn() {
+        APP.game.forEach(function (item, index) {
+            // game 实例接受两个参数，必需的 targetPos 和非必需的 callback
+            // 执行最后一个动画对象的时候，传入回调
+            if (index === 2) {
+                item.run(APP.source.prizeResultArray[index], function () {
+                    alert('你与大奖擦肩而过');
+                });
+            } else {
+                item.run(APP.source.prizeResultArray[index]);
+            }
+        });
+    }
 };
 
-App(params);
+APP.init();
 
 /***/ }),
 /* 1 */
@@ -149,7 +169,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-// Animate 动画
+// 动画方法
 var Animate = function () {
     function Animate(dom) {
         _classCallCheck(this, Animate);
@@ -158,7 +178,7 @@ var Animate = function () {
         this.startTime = 0; // 动画开始时间
         this.startPos = 0; // 动画开始位置
         this.endPos = 0; // 节点目标位置
-        this.property = null; // 节点 style 属性名
+        this.property = null; // 动画属性
         this.easing = null; // 动画速度曲线
         this.duration = null; // 持续时间
     }
@@ -168,9 +188,9 @@ var Animate = function () {
         value: function start(property, startPos, endPos, duration, easing, callback) {
             var _this = this;
 
-            this.property = property; // dom节点被改变的css属性名
-            this.startPos = startPos; // 获取dom节点初始位置
-            this.endPos = endPos; // dom节点目标位置
+            this.property = property; // 动画属性
+            this.startPos = startPos; // 获取 dom 节点初始位置
+            this.endPos = endPos; // dom 节点目标位置
 
             this.startTime = new Date().getTime(); // 动画启动时间
             this.duration = duration; // 动画持续时间
@@ -181,9 +201,9 @@ var Animate = function () {
                 if (_this.step() === false) {
                     // 如果动画结束，清除定时器
                     clearInterval(timeId); // 清除定时器
-                    callback && callback(); // 执行回调函数
+                    callback && callback(); // 如果有回调函数，则执行回调函数
                 }
-                // 每隔20秒执行 step() 函数
+                // 每隔20毫秒执行 step() 函数，如果时间越大，则动画帧数越小
                 _this.step();
             }, 20);
         }
@@ -199,19 +219,19 @@ var Animate = function () {
             }
 
             var pos = this.easing(t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration); // 执行动画函数
-            this.update(pos); // 更新dom节点位置
+            this.update(pos); // 更新 dom 节点位置
         }
     }, {
         key: 'update',
         value: function update(pos) {
-            this.dom.style[this.property] = pos + 'px'; // 修改dom节点相应属性值
+            this.dom.style[this.property] = pos + 'px'; // 修改 dom 节点相应属性值
         }
     }]);
 
     return Animate;
 }();
 
-// 执行动画方法
+// 设定动画方法的执行
 
 
 var Game = function () {
@@ -223,7 +243,7 @@ var Game = function () {
             console.error('参数错误');
             return false;
         }
-        // 对必要参数进行检查
+        // 检查必要参数
         if (!obj['dom'] && !obj['property'] && obj['startPos'] && obj['endPos']) {
             console.error('缺乏必要参数');
             return false;
@@ -237,18 +257,22 @@ var Game = function () {
 
         this.duration = obj['duration'] ? obj['duration'] : 500; // 动画持续时间，默认值为 500s
         this.easing = obj['easing'] ? obj['easing'] : 'linear'; // 动画速度曲线，默认值为 linear
-        this.targetPos = obj['targetPos'] ? obj['targetPos'] : obj['startPos']; // 动画执行到最后一个循环后停止到指定位置，默认值为 0
         this.counts = obj['counts'] ? obj['counts'] : 10; // 动画循环次数，默认值为 10
-
-        this.callback = obj['callback'] ? obj['callback'] : void 0; // 初始化回调
     }
 
     _createClass(Game, [{
         key: 'run',
-        value: function run() {
+        value: function run(targetPos, callback) {
             var _this2 = this;
 
-            // 计时器清零
+            // 检查参数
+            if (!targetPos) {
+                console.error('缺乏必要参数');
+                return false;
+            }
+            if (callback && typeof callback !== 'function') {
+                console.error('参数类型错误');
+            }
             var animate = new Animate(this.dom);
             // 执行动画
             animate.start(this.property, this.startPos, this.endPos, this.duration, this.easing, function () {
@@ -259,24 +283,27 @@ var Game = function () {
                     // 计时器清零
                     _this2.counter = 0;
                     // 在最后一次动画循环中将移动目标节点到指定位置
-                    animate.start(_this2.property, _this2.startPos, _this2.targetPos, 800, 'easeOut');
+                    animate.start(_this2.property, _this2.startPos, targetPos, 800, 'easeOut');
                     // 执行回调
-                    if (_this2.callback) {
+                    if (callback) {
                         setTimeout(function () {
-                            _this2.callback();
-                        }, 1500);
+                            callback();
+                        }, 1200);
                     }
                     return false;
                 };
-                // 执行动画循环
+                // 执行动画循环，将动画对象的位置重置到初始状态
                 _this2.dom.style[_this2.property] = _this2.startPos + 'px';
-                _this2.run();
+                _this2.run(targetPos, callback);
             });
         }
     }]);
 
     return Game;
 }();
+
+// 导出 Game 模块
+
 
 exports.default = Game;
 

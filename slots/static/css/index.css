@@ -7,6 +7,18 @@
   transform: translate(-50%, -50%);
   background: url('../image/bg.jpg') center no-repeat;
 }
+.slots-container-btn {
+  position: absolute;
+  top: 479px;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: 100px;
+  height: 60px;
+  cursor: pointer;
+  background-color: transparent;
+  border: 0;
+  outline: 0;
+}
 .superheros {
   width: 355px;
   height: 210px;
@@ -16,19 +28,20 @@
   transform: translate(-50%, 0);
   border-radius: 3px;
   overflow: hidden;
-  background: -webkit-linear-gradient(top, #2d2d2d 0, #e3e3e3 100%);
+  background: -webkit-linear-gradient(top, #2d2d2d 0, #fff 50%, #2d2d2d 100%);
 }
 .superheros-list01,
 .superheros-list02,
 .superheros-list03 {
   width: 110px;
   position: absolute;
-  top: -65px;
+  top: -60px;
   left: 0;
 }
 .superheros-list01 img,
 .superheros-list02 img,
 .superheros-list03 img {
+  display: block;
   width: 100%;
 }
 .superheros-list02 {
