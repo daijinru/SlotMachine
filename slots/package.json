@@ -1,0 +1,20 @@
+{
+  "name": "slots",
+  "version": "1.0.0",
+  "description": "模拟老虎机",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "戴锦如",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-es2015": "^6.24.1",
+    "gulp": "^3.9.1",
+    "gulp-less": "^3.3.2",
+    "webpack": "^3.5.5"
+  },
+  "dependencies": {}
+}
