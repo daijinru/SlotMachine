@@ -45,7 +45,7 @@ gulp.task('less', function() {
 gulp.task('scripts', function() {
 	return gulp.src(jsPath)
 		.pipe(babel())
-		.pipe(uglify({compress:{properties:false},output:{'quote_keys':true}}))
+		// .pipe(uglify({compress:{properties:false},output:{'quote_keys':true}}))
 		.pipe(header(explanatoryNotes))
 		.pipe(gulp.dest(distPath + 'js'))
 })

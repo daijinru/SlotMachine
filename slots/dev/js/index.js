@@ -176,7 +176,7 @@ class Game {
                 if (callback) {
                     setTimeout(() => {
                         callback();
-                    },1200)
+                    },1500)
                 }
                 return false;
             };
@@ -197,14 +197,15 @@ class VALIDATE {
     }
 
     start(state) {
-        Object.getOwnPropertyNames(state).forEach((val, key, array) => {      //遍历校验规则
-            let stateType  = typeof state[val];                                //当前类型
-            let propsType  = this.params[val].split('.')[0];                          //规则类型
-            let required   = this.params[val].split('.')[1];                          //规则参数是否必传
-            let isRequired = required  === 'isRequired'           ? true : false;   //验证当前参数是否必传
-            let isPropType = propsType === typeof state[val] ? true : false;   //验证当前类型与规则类型是否相等
-            let errorType  = `${val} type should be ${propsType} but ${stateType}`; //类型错误抛出异常值
-            let errorIsQu  = `${val} isRequired!'`;                                 //必传参数抛出类型异常值
+        //遍历校验规则
+        Object.getOwnPropertyNames(state).forEach(val => {                              
+            let stateType  = typeof state[val];                                         //当前类型
+            let propsType  = this.params[val].split('.')[0];                            //规则类型
+            let required   = this.params[val].split('.')[1];                            //规则参数是否必传
+            let isRequired = required  === 'isRequired'           ? true : false;       //验证当前参数是否必传
+            let isPropType = propsType === typeof state[val] ? true : false;            //验证当前类型与规则类型是否相等
+            let errorType  = `${val} type should be ${propsType} but ${stateType}`;     //类型错误抛出异常值
+            let errorIsQu  = `${val} isRequired!'`;                                     //必传参数抛出类型异常值
             //如果为必传参数但是没有传值
             if(isRequired  && !state[val]){                                    
                 throw new Error (errorIsQu);

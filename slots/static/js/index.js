@@ -1,2 +1,388 @@
 /*极客学院前端组*/
-"use strict";function _classCallCheck(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}var _typeof="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},_createClass=function(){function t(t,e){for(var r=0;r<e.length;r++){var s=e[r];s.enumerable=s.enumerable||!1,s.configurable=!0,"value"in s&&(s.writable=!0),Object.defineProperty(t,s.key,s)}}return function(e,r,s){return r&&t(e.prototype,r),s&&t(e,s),e}}(),Animate=function(){function t(e){_classCallCheck(this,t),this.validate=new VALIDATE({"property":"string.isRequired","startPos":"number.isRequired","endPos":"number.isRequired","duration":"number.isRequired","easing":"string.isRequired","callback":"function.notRequired","dom":"object.isRequired"}),this.validate.start({"dom":e}),this.dom=e,this.startTime=0,this.startPos=0,this.endPos=0,this.property=null,this.easing=null,this.duration=null}return _createClass(t,[{"key":"run","value":function(t,e,r,s,n,o){var i=this;this.validate.start({"property":t,"startPos":e,"endPos":r,"duration":s,"easing":n,"callback":o}),this.property=t,this.startPos=e,this.endPos=r,this.startTime=(new Date).getTime(),this.duration=s,this.easing=this._Tween(n);var a=setInterval(function(){!1===i._step()&&(clearInterval(a),o&&o()),i._step()},20)}},{"key":"_step","value":function(){var t=(new Date).getTime();if(t>=this.startTime+this.duration)return this._update(this.endPos),!1;var e=this.easing(t-this.startTime,this.startPos,this.endPos-this.startPos,this.duration);this._update(e)}},{"key":"_update","value":function(t){this.dom.style[this.property]=t+"px"}},{"key":"_Tween","value":function(t){return{"linear":function(t,e,r,s){return r*t/s+e},"easeIn":function(t,e,r,s){return r*(t/=s)*t+e},"easeOut":function(t,e,r,s){return-r*(t/=s)*(t-2)+e},"easeBoth":function(t,e,r,s){return(t/=s/2)<1?r/2*t*t+e:-r/2*(--t*(t-2)-1)+e},"easeInStrong":function(t,e,r,s){return r*(t/=s)*t*t*t+e},"easeOutStrong":function(t,e,r,s){return-r*((t=t/s-1)*t*t*t-1)+e},"easeBothStrong":function(t,e,r,s){return(t/=s/2)<1?r/2*t*t*t*t+e:-r/2*((t-=2)*t*t*t-2)+e}}[t]}}]),t}(),Game=function(){function t(e){_classCallCheck(this,t),this.validate=new VALIDATE({"obj":"object.isRequired","property":"string.isRequired","startPos":"number.isRequired","endPos":"number.isRequired","dom":"object.isRequired","targetPos":"number.isRequired","callback":"function.notRequired"}),this.validate.start({"obj":e,"dom":e["dom"],"property":e["property"],"startPos":e["startPos"],"endPos":e["endPos"]}),this.counter=0,this.dom=e["dom"],this.property=e["property"],this.startPos=e["startPos"],this.endPos=e["endPos"],this.duration=e["duration"]?e["duration"]:500,this.easing=e["easing"]?e["easing"]:"linear",this.counts=e["counts"]?e["counts"]:10}return _createClass(t,[{"key":"run","value":function(t,e){var r=this;this.validate.start({"targetPos":t,"callback":e});var s=new Animate(this.dom);s.run(this.property,this.startPos,this.endPos,this.duration,this.easing,function(){if(r.counter++,r.counter>=r.counts)return r.counter=0,s.run(r.property,r.startPos,t,800,"easeOut"),e&&setTimeout(function(){e()},1200),!1;r.dom.style[r.property]=r.startPos+"px",r.run(t,e)})}}]),t}(),VALIDATE=function(){function t(e){_classCallCheck(this,t),this.params=e}return _createClass(t,[{"key":"start","value":function(t){var e=this;Object.getOwnPropertyNames(t).forEach(function(r,s,n){var o=_typeof(t[r]),i=e.params[r].split(".")[0],a="isRequired"===e.params[r].split(".")[1],u=i===_typeof(t[r]),c=r+" type should be "+i+" but "+o,l=r+" isRequired!'";if(a&&!t[r])throw new Error(l);if(!u&&t[r])throw new Error(c)})}}]),t}(),App=function(){function t(e){var r=this;_classCallCheck(this,t),this.validate=new VALIDATE({"params":"object.isRequired","dom":"object.isRequired","property":"string.isRequired","startPos":"number.isRequired","endPos":"number.isRequired","targetPosArray":"object.isRequired","callback":"function.notRequired"}),e.forEach(function(t){r.validate.start({"params":t,"dom":t["dom"],"property":t["property"],"startPos":t["startPos"],"endPos":t["endPos"]})}),this.params=e,this.game=[],this._gameInstance()}return _createClass(t,[{"key":"run","value":function(t,e){this.validate.start({"targetPosArray":t,"callback":e}),this.game.forEach(function(r,s){s===t.length-1?r.run(t[s],function(){e&&"function"==typeof e&&e()}):r.run(t[s])})}},{"key":"_gameInstance","value":function(){var t=this;this.params.forEach(function(e,r){t.game[r]=new Game(e)})}}]),t}(),app=new App([{"dom":document.getElementsByClassName("superheros-list01")[0],"property":"top","startPos":-60,"endPos":-1050,"counts":5},{"dom":document.getElementsByClassName("superheros-list02")[0],"property":"top","startPos":-60,"endPos":-1050,"counts":6},{"dom":document.getElementsByClassName("superheros-list03")[0],"property":"top","startPos":-60,"endPos":-1050,"counts":7}]);window.lock=!1,document.getElementById("start").addEventListener("click",function(){if(!window.lock){window.lock=!0;var t=[10,10,10].map(function(t){return Math.floor(Math.random()*(t-1)+1)}).map(function(t){return 50-110*t});app.run(t,function(){!0===t.some(function(e){return e!==t[0]})?alert("很抱歉，没有中奖"):alert("恭喜中奖了！你可以去买彩票了！"),window.lock=!1})}});
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/* 极客前端出品
+** name  : 超级英雄老虎机
+** author: 戴锦如
+** email : jeocat@163.com
+*/
+
+/* Animate 类实现了一个对象从某个位置到目的位置的动画过渡效果
+** run() 方法是 Animate 类的开放接口
+** run() 方法接受 property,startPos,endPos,duration,easing,callback(可选)，并初始化相关参数，通过定时器执行 _step() 方法
+** _step() 方法，每次执行都会调用 _update() 方法更新动画对象的位置，可以理解为动画帧
+*/
+var Animate = function () {
+    function Animate(dom) {
+        _classCallCheck(this, Animate);
+
+        // 实例化检验类
+        this.validate = new VALIDATE({
+            property: 'string.isRequired',
+            startPos: 'number.isRequired',
+            endPos: 'number.isRequired',
+            duration: 'number.isRequired',
+            easing: 'string.isRequired',
+            callback: 'function.notRequired',
+            dom: 'object.isRequired'
+        });
+        this.validate.start({ dom: dom }); // 检验动画对象
+
+        this.dom = dom; // 动画对象
+        this.startTime = 0; // 动画开始时间
+        this.startPos = 0; // 动画开始位置
+        this.endPos = 0; // 动画结束位置
+        this.property = null; // 动画属性
+        this.easing = null; // 动画速度曲线
+        this.duration = null; // 动画持续时间
+    }
+
+    _createClass(Animate, [{
+        key: 'run',
+        value: function run(property, startPos, endPos, duration, easing, callback) {
+            var _this = this;
+
+            // 检验参数
+            this.validate.start({ property: property, startPos: startPos, endPos: endPos, duration: duration, easing: easing, callback: callback });
+
+            this.property = property; // 初始化动画属性
+            this.startPos = startPos; // 初始化动画开始位置
+            this.endPos = endPos; // 初始化动画结束位置
+
+            this.startTime = new Date().getTime(); // 初始化动画开始时间
+            this.duration = duration; // 初始化动画持续时间
+            this.easing = this._Tween(easing); // 初始化动画速度曲线
+
+            // 启动定时器
+            var timeId = setInterval(function () {
+                // _step() 方法会在动画结束的时候返回 false
+                if (_this._step() === false) {
+                    // 清除定时器
+                    clearInterval(timeId);
+                    // 执行回调函数
+                    callback && callback();
+                }
+                // 每隔20毫秒执行 _step() 方法，如果时间越大，则动画帧数越小，因此不宜过大
+                _this._step();
+            }, 20);
+        }
+    }, {
+        key: '_step',
+        value: function _step() {
+            // 获取当前时间
+            var t = new Date().getTime();
+            // 当前时间大于动画开始时间加上动画持续时间之和
+            if (t >= this.startTime + this.duration) {
+                // 最后一次修正动画对象的位置
+                this._update(this.endPos);
+                // 结束动画
+                return false;
+            }
+            // 获取动画速度曲线返回的值
+            var pos = this.easing(t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration);
+            // 更新动画对象位置 
+            this._update(pos);
+        }
+    }, {
+        key: '_update',
+        value: function _update(pos) {
+            // 更新动画对象的 style 属性值
+            this.dom.style[this.property] = pos + 'px';
+        }
+    }, {
+        key: '_Tween',
+        value: function _Tween(easing) {
+            var Tween = {
+                //匀速
+                linear: function linear(t, b, c, d) {
+                    return c * t / d + b;
+                },
+                //加速曲线
+                easeIn: function easeIn(t, b, c, d) {
+                    return c * (t /= d) * t + b;
+                },
+                //减速曲线
+                easeOut: function easeOut(t, b, c, d) {
+                    return -c * (t /= d) * (t - 2) + b;
+                },
+                //加速减速曲线
+                easeBoth: function easeBoth(t, b, c, d) {
+                    if ((t /= d / 2) < 1) {
+                        return c / 2 * t * t + b;
+                    }
+                    return -c / 2 * (--t * (t - 2) - 1) + b;
+                },
+                //加加速曲线
+                easeInStrong: function easeInStrong(t, b, c, d) {
+                    return c * (t /= d) * t * t * t + b;
+                },
+                //减减速曲线
+                easeOutStrong: function easeOutStrong(t, b, c, d) {
+                    return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+                },
+                //加加速减减速曲线
+                easeBothStrong: function easeBothStrong(t, b, c, d) {
+                    if ((t /= d / 2) < 1) {
+                        return c / 2 * t * t * t * t + b;
+                    }
+                    return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
+                }
+            };
+            return Tween[easing];
+        }
+    }]);
+
+    return Animate;
+}();
+
+/* Game 类是对 Animate 类的进一步封装，提供动画的循环和重置，及动画结束之后的回调函数
+** run() 方法是 Game 类的开放接口
+** run() 方法接受 targetPos（最后一次循环的动画结束位置）,callback（可选）回调
+*/
+
+
+var Game = function () {
+    function Game(obj) {
+        _classCallCheck(this, Game);
+
+        // 实例化检验类
+        this.validate = new VALIDATE({
+            obj: 'object.isRequired',
+            property: 'string.isRequired',
+            startPos: 'number.isRequired',
+            endPos: 'number.isRequired',
+            dom: 'object.isRequired',
+            targetPos: 'number.isRequired',
+            callback: 'function.notRequired'
+        });
+        // 检验参数
+        this.validate.start({
+            obj: obj,
+            dom: obj['dom'],
+            property: obj['property'],
+            startPos: obj['startPos'],
+            endPos: obj['endPos']
+        });
+
+        this.counter = 0; // 初始化计数器
+        this.dom = obj['dom']; // 初始化动画对象
+        this.property = obj['property']; // 初始化动画属性
+        this.startPos = obj['startPos']; // 初始化动画开始位置
+        this.endPos = obj['endPos']; // 初始化动画结束位置
+
+        this.duration = obj['duration'] ? obj['duration'] : 500; // 初始化动画持续时间，默认值为 500s
+        this.easing = obj['easing'] ? obj['easing'] : 'linear'; // 初始化动画速度曲线，默认值为 'linear'
+        this.counts = obj['counts'] ? obj['counts'] : 10; // 初始化动画循环次数，默认值为 10
+    }
+
+    _createClass(Game, [{
+        key: 'run',
+        value: function run(targetPos, callback) {
+            var _this2 = this;
+
+            // 检查参数
+            this.validate.start({ targetPos: targetPos, callback: callback });
+            // 实例化 Animate 类并传入动画对象
+            var animate = new Animate(this.dom);
+            // 执行动画
+            animate.run(this.property, this.startPos, this.endPos, this.duration, this.easing, function () {
+                // 计数器开始计数
+                _this2.counter++;
+                // 当计数器大于或者等于动画循环次数时，停止执行动画。
+                if (_this2.counter >= _this2.counts) {
+                    // 计数器清零
+                    _this2.counter = 0;
+                    // 在最后一次动画循环中移动动画对象到结束位置
+                    animate.run(_this2.property, _this2.startPos, targetPos, 800, 'easeOut');
+                    // 执行回调函数
+                    if (callback) {
+                        setTimeout(function () {
+                            callback();
+                        }, 1500);
+                    }
+                    return false;
+                };
+                // 在每一次动画循环最后重置动画对象到开始位置
+                _this2.dom.style[_this2.property] = _this2.startPos + 'px';
+                // 再次执行动画循环
+                _this2.run(targetPos, callback);
+            });
+        }
+    }]);
+
+    return Game;
+}();
+
+/* 校验类
+*/
+
+var VALIDATE = function () {
+    function VALIDATE(params) {
+        _classCallCheck(this, VALIDATE);
+
+        this.params = params;
+    }
+
+    _createClass(VALIDATE, [{
+        key: 'start',
+        value: function start(state) {
+            var _this3 = this;
+
+            //遍历校验规则
+            Object.getOwnPropertyNames(state).forEach(function (val) {
+                var stateType = _typeof(state[val]); //当前类型
+                var propsType = _this3.params[val].split('.')[0]; //规则类型
+                var required = _this3.params[val].split('.')[1]; //规则参数是否必传
+                var isRequired = required === 'isRequired' ? true : false; //验证当前参数是否必传
+                var isPropType = propsType === _typeof(state[val]) ? true : false; //验证当前类型与规则类型是否相等
+                var errorType = val + ' type should be ' + propsType + ' but ' + stateType; //类型错误抛出异常值
+                var errorIsQu = val + ' isRequired!\''; //必传参数抛出类型异常值
+                //如果为必传参数但是没有传值
+                if (isRequired && !state[val]) {
+                    throw new Error(errorIsQu);
+                }
+                //如果当前类型与规则类型不等
+                if (!isPropType && state[val]) {
+                    throw new Error(errorType);
+                }
+            });
+        }
+    }]);
+
+    return VALIDATE;
+}();
+
+/* App 类初始化动画执行的具体参数，封装调用动画的行为
+** run() 方法是 App 类的开放接口，接受动画最终循环的结束位置和回调函数
+*/
+
+
+var App = function () {
+    function App(params) {
+        var _this4 = this;
+
+        _classCallCheck(this, App);
+
+        // 实例化检验类
+        this.validate = new VALIDATE({
+            params: 'object.isRequired',
+            dom: 'object.isRequired',
+            property: 'string.isRequired',
+            startPos: 'number.isRequired',
+            endPos: 'number.isRequired',
+            targetPosArray: 'object.isRequired',
+            callback: 'function.notRequired'
+        });
+        // 检查参数
+        params.forEach(function (item) {
+            _this4.validate.start({
+                params: item,
+                dom: item['dom'],
+                property: item['property'],
+                startPos: item['startPos'],
+                endPos: item['endPos']
+            });
+        });
+
+        this.params = params; // 初始化参数
+        this.game = []; // 初始化 game 数组
+        this._gameInstance();
+    }
+
+    _createClass(App, [{
+        key: 'run',
+        value: function run(targetPosArray, callback) {
+            // 检查参数
+            this.validate.start({ targetPosArray: targetPosArray, callback: callback });
+            // 遍历 game 数组
+            this.game.forEach(function (item, index) {
+                // 执行最后一个对象的动画的时候，传入回调
+                if (index === targetPosArray.length - 1) {
+                    item.run(targetPosArray[index], function () {
+                        callback && typeof callback === 'function' && callback();
+                    });
+                    // 其他对象的动画正常执行
+                } else {
+                    item.run(targetPosArray[index]);
+                }
+            });
+        }
+    }, {
+        key: '_gameInstance',
+        value: function _gameInstance() {
+            var _this5 = this;
+
+            // 根据参数实例化 Game 并逐条压入 game 数组
+            this.params.forEach(function (item, index) {
+                _this5.game[index] = new Game(item);
+            });
+        }
+    }]);
+
+    return App;
+}();
+
+/* 我们来模拟一次吧！
+** 实例化 App类，每一个实例都传入相关参数
+** 通过点击事件触发 App 实例的 run() 方法
+*/
+
+
+var app = new App([{
+    dom: document.getElementsByClassName('superheros-list01')[0], // 动画对象，必须
+    property: 'top', // 动画属性，必需
+    startPos: -60, // 动画开始位置，必需
+    endPos: -1050, // 动画终止的位置，必需
+    counts: 5 // 动画循环次数，非必需
+}, {
+    dom: document.getElementsByClassName('superheros-list02')[0],
+    property: 'top',
+    startPos: -60,
+    endPos: -1050,
+    counts: 6
+}, {
+    dom: document.getElementsByClassName('superheros-list03')[0],
+    property: 'top',
+    startPos: -60,
+    endPos: -1050,
+    counts: 7
+}]);
+
+/* 假设[1,1,1] [2,2,2] ... [10,10,10] 是为中奖，其它不中奖
+** 因此需要对抽奖序列号进行滑动距离的换算，例如在这个例子当中将 [1,1,1] 换算成 [-60,-60,-60];两个抽奖结果之间相距 110
+*/
+
+// 设定一个锁，避免重复触发动画
+window.lock = false;
+document.getElementById('start').addEventListener('click', function () {
+    if (window.lock) return;
+    // 加锁
+    window.lock = true;
+    // 模拟一次随机数组
+    var sourceArray = [10, 10, 10].map(function (item) {
+        // 避免出现为 0 的情况，Math.random() * (max - min) + min
+        return Math.floor(Math.random() * (item - 1) + 1);
+    });
+    // 转换 sourceArray 数组为动画对象最终循环的位置
+    var prizeArray = sourceArray.map(function (item) {
+        return 50 - item * 110;
+    });
+    // 传入参数，执行动画
+    app.run(prizeArray, function () {
+
+        // 判断 prizeArray 内的数字是否全部相等
+        var isPrize = prizeArray.some(function (item) {
+            return item !== prizeArray[0];
+        });
+        // 反馈用户
+        isPrize === true ? alert('很抱歉，没有中奖') : alert('恭喜中奖了！你可以去买彩票了！');
+        // 解锁
+        window.lock = false;
+    });
+});
