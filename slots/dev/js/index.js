@@ -1,13 +1,117 @@
 /* 极客前端出品
-** name  : 老虎机
+** name  : 超级英雄老虎机
 ** author: 戴锦如
 ** email : jeocat@163.com
 */ 
 
-// 动画执行实现
+/* Animate 类实现了一个对象从某个位置到目的位置的动画过渡效果
+** run() 方法是 Animate 类的开放接口
+** run() 方法接受 property,startPos,endPos,duration,easing,callback(可选)，并初始化相关参数，通过定时器执行 _step() 方法
+** _step() 方法，每次执行都会调用 _update() 方法更新动画对象的位置，可以理解为动画帧
+*/ 
+class Animate {
+    constructor(dom) {
+        this.dom            = dom;           // 动画对象
+        this.startTime      = 0;             // 动画开始时间
+        this.startPos       = 0;             // 动画开始位置
+        this.endPos         = 0;             // 动画结束位置
+        this.property       = null;          // 动画属性
+        this.easing         = null;          // 动画速度曲线
+        this.duration       = null;          // 动画持续时间
+    }
+
+    run(property, startPos, endPos, duration, easing, callback) {
+
+        this.property       = property;                     // 初始化动画属性
+        this.startPos       = startPos;                     // 初始化动画开始位置
+        this.endPos         = endPos;                       // 初始化动画结束位置
+
+        this.startTime      = new Date().getTime();         // 初始化动画开始时间
+        this.duration       = duration;                     // 初始化动画持续时间
+        this.easing         = this._Tween(easing);          // 初始化动画速度曲线
+
+        // 启动定时器
+        const timeId = setInterval(() => {
+            // _step() 方法会在动画结束的时候返回 false
+            if (this._step() === false) {
+                // 清除定时器
+                clearInterval(timeId);
+                // 执行回调函数
+                callback && callback();
+            }
+            // 每隔20毫秒执行 _step() 方法，如果时间越大，则动画帧数越小，因此不宜过大
+            this._step();
+        }, 20);
+    }
+    
+    _step() {
+        // 获取当前时间
+        const t = new Date().getTime(); 
+        // 当前时间大于动画开始时间加上动画持续时间之和
+        if (t >= this.startTime + this.duration) { 
+            // 最后一次修正动画对象的位置
+            this._update(this.endPos); 
+            // 结束动画
+            return false; 
+        }
+        // 获取动画速度曲线返回的值
+        const pos = this.easing(t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration);
+        // 更新动画对象位置 
+        this._update(pos); 
+    }
+
+    _update(pos) {
+        // 更新动画对象的 style 属性值
+        this.dom.style[this.property] = pos + 'px'; 
+    }
+
+    _Tween(easing) {
+        const Tween = {
+            //匀速
+            linear: function(t, b, c, d) { 
+                return c * t / d + b;
+            },
+            //加速曲线
+            easeIn: function(t, b, c, d) { 
+                return c * (t /= d) * t + b;
+            },
+            //减速曲线
+            easeOut: function(t, b, c, d) { 
+                return -c * (t /= d) * (t - 2) + b;
+            },
+            //加速减速曲线
+            easeBoth: function(t, b, c, d) { 
+                if ((t /= d / 2) < 1) {
+                    return c / 2 * t * t + b;
+                }
+                return -c / 2 * ((--t) * (t - 2) - 1) + b;
+            },
+            //加加速曲线
+            easeInStrong: function(t, b, c, d) { 
+                return c * (t /= d) * t * t * t + b;
+            },
+            //减减速曲线
+            easeOutStrong: function(t, b, c, d) { 
+                return -c * ((t = t / d - 1) * t * t * t - 1) + b;
+            },
+            //加加速减减速曲线
+            easeBothStrong: function(t, b, c, d) { 
+                if ((t /= d / 2) < 1) {
+                    return c / 2 * t * t * t * t + b;
+                }
+                return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
+            }
+        }
+        return Tween[easing]
+    }
+}
+
+/* Game 类是对 Animate 类的进一步封装，提供动画的循环和重置，及动画结束之后的回调函数
+** run() 方法是 Game 类的开放接口
+** run() 方法接受 targetPos（最后一次循环的动画结束位置）,callback（可选）回调
+*/ 
 class Game {
     constructor(obj) {
-
         // 如果 obj 参数不是一个对象，打印错误
         if (typeof obj !== 'object') { 
             console.error('参数错误');
@@ -19,15 +123,15 @@ class Game {
             return false;
         }
 
-        this.counter            = 0; // 计数器
-        this.dom                = obj['dom']; // 动画对象
-        this.property           = obj['property']; // 动画属性
-        this.startPos           = obj['startPos']; // 动画起点
-        this.endPos             = obj['endPos']; // 动画终点
+        this.counter            = 0;                                        // 初始化计数器
+        this.dom                = obj['dom'];                               // 初始化动画对象
+        this.property           = obj['property'];                          // 初始化动画属性
+        this.startPos           = obj['startPos'];                          // 初始化动画开始位置
+        this.endPos             = obj['endPos'];                            // 初始化动画结束位置
 
-        this.duration           = obj['duration'] ? obj['duration'] : 500; // 动画持续时间，默认值为 500s
-        this.easing             = obj['easing'] ? obj['easing'] : 'linear'; // 动画速度曲线，默认值为 linear
-        this.counts             = obj['counts'] ? obj['counts'] : 10; // 动画循环次数，默认值为 10
+        this.duration           = obj['duration'] ? obj['duration'] : 500;  // 初始化动画持续时间，默认值为 500s
+        this.easing             = obj['easing'] ? obj['easing'] : 'linear'; // 初始化动画速度曲线，默认值为 'linear'
+        this.counts             = obj['counts'] ? obj['counts'] : 10;       // 初始化动画循环次数，默认值为 10
     }
 
     run(targetPos,callback) {
@@ -39,285 +143,134 @@ class Game {
         if (callback && typeof callback !== 'function') {
             console.error('参数类型错误');
         }
+        // 实例化 Animate 类并传入动画对象
         const animate = new Animate(this.dom);
         // 执行动画
-        animate.start(this.property, this.startPos, this.endPos, this.duration, this.easing, () => {
-            // 计时器开始计数
+        animate.run(this.property, this.startPos, this.endPos, this.duration, this.easing, () => {
+            // 计数器开始计数
             this.counter++;
-            // 当计时器大于或者等于指定的动画循环次数时，停止执行动画。
+            // 当计数器大于或者等于动画循环次数时，停止执行动画。
             if (this.counter >= this.counts) {
-                // 计时器清零
+                // 计数器清零
                 this.counter = 0;
-                // 在最后一次动画循环中将移动目标节点到指定位置
-                animate.start(this.property, this.startPos, targetPos, 800, 'easeOut');
-                // 执行回调
+                // 在最后一次动画循环中移动动画对象到结束位置
+                animate.run(this.property, this.startPos, targetPos, 800, 'easeOut');
+                // 执行回调函数
                 if (callback) {
                     setTimeout(() => {
                         callback();
-                    },1500)
+                    },1200)
                 }
                 return false;
             };
-            // 执行动画循环， 将动画对象的位置重置到初始状态
+            // 在每一次动画循环最后重置动画对象到开始位置
             this.dom.style[this.property] = this.startPos + 'px';
+            // 再次执行动画循环
             this.run(targetPos,callback);
         })
     }
 }
 
-// 动画效果实现
-class Animate {
-    constructor(dom) {
-        this.dom            = dom; // 运动节点
-        this.startTime      = 0; // 动画开始时间
-        this.startPos       = 0; // 动画开始位置
-        this.endPos         = 0; // 节点目标位置
-        this.property       = null; // 动画属性
-        this.easing         = null; // 动画速度曲线
-        this.duration       = null; // 持续时间
-    }
-
-    start(property, startPos, endPos, duration, easing, callback) {
-
-        this.property       = property; // 动画属性
-        this.startPos       = startPos; // 获取 dom 节点初始位置
-        this.endPos         = endPos; // dom 节点目标位置
-
-        this.startTime      = new Date().getTime(); // 动画启动时间
-        this.duration       = duration; // 动画持续时间
-        this.easing         = Tween[easing]; // 动画速度算法
-
-         // 启动定时器
-        const timeId = setInterval(() => {
-            // 如果动画结束，清除定时器
-            if (this._step() === false) {
-                // 清除定时器
-                clearInterval(timeId);
-                // 清除定时器
-                callback && callback();
-            }
-            // 每隔20毫秒执行 step() 函数，如果时间越大，则动画帧数越小
-            this._step();
-        }, 20);
-    }
-
-    _step() {
-        // 获取动画当前时间
-        const t = new Date().getTime(); 
-        // 当前时间大于动画开始时间加上动画持续时间之和
-        if (t >= this.startTime + this.duration) { 
-            // 最后一次修正动画的位置
-            this._update(this.endPos); 
-            // 结束动画
-            return false; 
-        }
-        // 执行动画函数
-        const pos = this.easing(t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration);
-        // 更新 dom 节点位置 
-        this._update(pos); 
-    }
-
-    _update(pos) {
-        // 修改 dom 节点相应属性值
-        this.dom.style[this.property] = pos + 'px'; 
-    }
-}
-
-// 动画速率曲线（仅供参考）
-const Tween = {
-    linear: function(t, b, c, d) { //匀速
-        return c * t / d + b;
-    },
-    easeIn: function(t, b, c, d) { //加速曲线
-        return c * (t /= d) * t + b;
-    },
-    easeOut: function(t, b, c, d) { //减速曲线
-        return -c * (t /= d) * (t - 2) + b;
-    },
-    easeBoth: function(t, b, c, d) { //加速减速曲线
-        if ((t /= d / 2) < 1) {
-            return c / 2 * t * t + b;
-        }
-        return -c / 2 * ((--t) * (t - 2) - 1) + b;
-    },
-    easeInStrong: function(t, b, c, d) { //加加速曲线
-        return c * (t /= d) * t * t * t + b;
-    },
-    easeOutStrong: function(t, b, c, d) { //减减速曲线
-        return -c * ((t = t / d - 1) * t * t * t - 1) + b;
-    },
-    easeBothStrong: function(t, b, c, d) { //加加速减减速曲线
-        if ((t /= d / 2) < 1) {
-            return c / 2 * t * t * t * t + b;
-        }
-        return -c / 2 * ((t -= 2) * t * t * t - 2) + b;
-    },
-    elasticIn: function(t, b, c, d, a, p) { //正弦衰减曲线（弹动渐入）
-        if (t === 0) {
-            return b;
-        }
-        if ((t /= d) == 1) {
-            return b + c;
-        }
-        if (!p) {
-            p = d * 0.3;
-        }
-        if (!a || a < Math.abs(c)) {
-            a = c;
-            var s = p / 4;
-        } else {
-            var s = p / (2 * Math.PI) * Math.asin(c / a);
-        }
-        return -(a * Math.pow(2, 10 * (t -= 1)) * Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
-    },
-    elasticOut: function(t, b, c, d, a, p) { //正弦增强曲线（弹动渐出）
-        if (t === 0) {
-            return b;
-        }
-        if ((t /= d) == 1) {
-            return b + c;
-        }
-        if (!p) {
-            p = d * 0.3;
-        }
-        if (!a || a < Math.abs(c)) {
-            a = c;
-            var s = p / 4;
-        } else {
-            var s = p / (2 * Math.PI) * Math.asin(c / a);
-        }
-        return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
-    },
-    elasticBoth: function(t, b, c, d, a, p) {
-        if (t === 0) {
-            return b;
-        }
-        if ((t /= d / 2) == 2) {
-            return b + c;
-        }
-        if (!p) {
-            p = d * (0.3 * 1.5);
-        }
-        if (!a || a < Math.abs(c)) {
-            a = c;
-            var s = p / 4;
-        } else {
-            var s = p / (2 * Math.PI) * Math.asin(c / a);
-        }
-        if (t < 1) {
-            return -0.5 * (a * Math.pow(2, 10 * (t -= 1)) *
-                Math.sin((t * d - s) * (2 * Math.PI) / p)) + b;
-        }
-        return a * Math.pow(2, -10 * (t -= 1)) *
-            Math.sin((t * d - s) * (2 * Math.PI) / p) * 0.5 + c + b;
-    },
-    backIn: function(t, b, c, d, s) { //回退加速（回退渐入）
-        if (typeof s == 'undefined') {
-            s = 1.70158;
-        }
-        return c * (t /= d) * t * ((s + 1) * t - s) + b;
-    },
-    backOut: function(t, b, c, d, s) {
-        if (typeof s == 'undefined') {
-            s = 1.10158; //回缩的距离
-        }
-        return c * ((t = t / d - 1) * t * ((s + 1) * t + s) + 1) + b;
-    },
-    backBoth: function(t, b, c, d, s) {
-        if (typeof s == 'undefined') {
-            s = 1.70158;
-        }
-        if ((t /= d / 2) < 1) {
-            return c / 2 * (t * t * (((s *= (1.525)) + 1) * t - s)) + b;
-        }
-        return c / 2 * ((t -= 2) * t * (((s *= (1.525)) + 1) * t + s) + 2) + b;
-    },
-    bounceIn: function(t, b, c, d) { //弹球减振（弹球渐出）
-        return c - Tween['bounceOut'](d - t, 0, c, d) + b;
-    },
-    bounceOut: function(t, b, c, d) {
-        if ((t /= d) < (1 / 2.75)) {
-            return c * (7.5625 * t * t) + b;
-        } else if (t < (2 / 2.75)) {
-            return c * (7.5625 * (t -= (1.5 / 2.75)) * t + 0.75) + b;
-        } else if (t < (2.5 / 2.75)) {
-            return c * (7.5625 * (t -= (2.25 / 2.75)) * t + 0.9375) + b;
-        }
-        return c * (7.5625 * (t -= (2.625 / 2.75)) * t + 0.984375) + b;
-    },
-    bounceBoth: function(t, b, c, d) {
-        if (t < d / 2) {
-            return Tween['bounceIn'](t * 2, 0, c, d) * 0.5 + b;
-        }
-        return Tween['bounceOut'](t * 2 - d, 0, c, d) * 0.5 + c * 0.5 + b;
-    }
-}
-
-// 程序调用逻辑
+/* App 类初始化动画执行的具体参数，封装调用动画的行为
+** run() 方法是 App 类的开放接口，接受动画最终循环的结束位置和回调函数
+*/ 
 class App {
-    constructor(button,params) {
+    constructor(params) {
 
-        if (!button && !params) {
-            console.error('参数缺失');
-            return false;
+        try {
+            if (!params) throw new Error('params 对象缺失');
+        } catch(error) {
+            alert(error);
         }
 
-        this.params = params;
-        this.button = button;
-        this.game   = []; // 初始化 game 数组
-
-        this._gameInstance();
+        this.params = params; // 初始化参数
+        this.game   = [];     // 初始化 game 数组
+        this._gameInstance(); 
     }
-    // 初始化
-    
-    // 根据参数实例化 Game 并逐条压入 this.game
+
+    run(targetPosArray,callback) {
+        this.game.forEach((item, index) => {
+            // 执行最后一个对象的动画的时候，传入回调
+            if (index === (targetPosArray.length - 1)) {
+                item.run(targetPosArray[index], () => {
+                    callback && typeof callback === 'function' && callback();
+                })
+            // 其他对象的动画正常执行
+            } else {
+                item.run(targetPosArray[index]);
+            }
+        })
+    }
+
     _gameInstance() {
+        // 根据参数实例化 Game 并逐条压入 game 数组
         this.params.forEach((item, index) => {
             this.game[index] = new Game(item);
         })
     }
-
-    run(prizeResultArray,callback) {
-        this.game.forEach((item, index) => {
-            // game 实例接受两个参数，必需的 targetPos 和非必需的 callback
-            // 执行最后一个动画对象的时候，传入回调
-            if (index === (prizeResultArray.length - 1)) {
-                item.run(prizeResultArray[index], () => {
-                    callback && typeof callback === 'function' && callback();
-                })
-            } else {
-                item.run(prizeResultArray[index]);
-            }
-        })
-    }
 }
 
-// -------------- 分界线 -----------------
-
-const app = new App(document.getElementById('start'),[{
-    dom: document.getElementsByClassName('superheros-list01')[0], // 动画对象，必须
-    property: 'top', // 动画属性，必需
-    startPos: -60, // 动画开始位置，必需
-    endPos: -1050, // 动画终止的位置，必需
-    counts: 5 // 动画循环次数，非必需
+/* 实例化 App类，每一个实例都传入相关参数
+** 通过点击事件触发 App 实例的 run() 方法
+*/
+const app = new App([{
+    dom: document.getElementsByClassName('superheros-list01')[0],   // 动画对象，必须
+    property: 'top',                                                // 动画属性，必需
+    startPos: -60,                                                  // 动画开始位置，必需
+    endPos: -1050,                                                  // 动画终止的位置，必需
+    counts: 5                                                       // 动画循环次数，非必需
 },{
-    dom: document.getElementsByClassName('superheros-list02')[0], // 动画对象，必须
+    dom: document.getElementsByClassName('superheros-list02')[0],
     property: 'top',
     startPos: -60,
     endPos: -1050,
     counts: 6
 },{
-    dom: document.getElementsByClassName('superheros-list03')[0], // 动画对象，必须
+    dom: document.getElementsByClassName('superheros-list03')[0],
     property: 'top',
     startPos: -60,
     endPos: -1050,
     counts: 7
 }])
 
-const prizeResultArray = [-170, -500, -500];
+/* 假设[1,1,1] [2,2,2] ... [10,10,10] 是为中奖，其它不中奖
+** 因此需要对抽奖序列号进行滑动距离的换算，例如在这个例子当中将 [1,1,1] 换算成 [-60,-60,-60];两个抽奖结果之间相距 110
+*/ 
 
+// 设定一个锁，避免重复触发动画
+window.lock = false;
 document.getElementById('start').addEventListener('click',function(){
-    app.run(prizeResultArray,function(){
-        console.log('hello')
+    if (window.lock) return;
+    // 加锁
+    window.lock = true;
+    // 模拟一次随机数组
+    const sourceArray = [10,10,10].map(item => {
+        // 避免出现为 0 的情况，Math.random() * (max - min) + min
+        return Math.floor(Math.random() * (item - 1) + 1)
+    });
+    // 转换 sourceArray 数组为动画对象最终循环的位置
+    const prizeArray = sourceArray.map(item => {
+        return 50 - item * 110
+    });
+    // 传入参数，执行动画
+    app.run(prizeArray,function(){
+
+        // 判断 prizeArray 内的数字是否全部相等
+        const isPrize = prizeArray.some(item => {
+            return item !== prizeArray[0]
+        })
+        // 反馈用户
+        isPrize === true ? alert('很抱歉，没有中奖') : alert('恭喜中奖了！你可以去买彩票了！')
+        // 解锁
+        window.lock = false;
     })
 })
+
+
+
+
+
+
+
+
+
