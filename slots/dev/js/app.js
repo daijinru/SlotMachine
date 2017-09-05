@@ -20,10 +20,10 @@ const sourceFromServer = { isPrize: false, prize: 8, prizeAmount: 10 };
 let animatelock = false;
 document.getElementById('start').addEventListener('click', function() {
     // 这里应该添加锁，避免在动画运行的时候重复触发
-    if (let animatelock) return;
-    let animatelock = true;
+    if (animatelock) return;
+    animatelock = true;
     // 开始游戏
     slotmachine.run(sourceFromServer,function(){
-        let animatelock = false;
+        animatelock = false;
     })
 })
