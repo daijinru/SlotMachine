@@ -1,0 +1,2 @@
+/*极客学院前端组*/
+"use strict";var slotmachine=new SlotMachine([{"dom":document.getElementsByClassName("superheros-list01")[0],"property":"top","startPos":-60,"endPos":-1050,"counts":5},{"dom":document.getElementsByClassName("superheros-list02")[0],"property":"top","startPos":-60,"endPos":-1050,"counts":7},{"dom":document.getElementsByClassName("superheros-list03")[0],"property":"top","startPos":-60,"endPos":-1050,"counts":9}]),prizeArray=[-500,-500,-500];document.getElementById("start").addEventListener("click",function(){slotmachine.run(prizeArray)});

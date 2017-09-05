@@ -14,7 +14,7 @@ import uglify			from 'gulp-uglify';
 const explanatoryNotes = '/*极客学院前端组*/\n';
 // 源文件地址
 const lessPath = 'dev/less/index.less';
-const jsPath = 'dev/js/index.js';
+const jsPath = 'dev/js/*.js';
 const imagePath = 'dev/image/*.+(png|jpg|gif|svg)';
 
 // 编译后路径
@@ -45,7 +45,7 @@ gulp.task('less', function() {
 gulp.task('scripts', function() {
 	return gulp.src(jsPath)
 		.pipe(babel())
-		// .pipe(uglify({compress:{properties:false},output:{'quote_keys':true}}))
+		.pipe(uglify({compress:{properties:false},output:{'quote_keys':true}}))
 		.pipe(header(explanatoryNotes))
 		.pipe(gulp.dest(distPath + 'js'))
 })
