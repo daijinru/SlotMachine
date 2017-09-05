@@ -23,12 +23,6 @@ var Animate = function () {
         _classCallCheck(this, Animate);
 
         this.dom = dom; // 动画对象
-        this.startTime = 0; // 动画开始时间
-        this.startPos = 0; // 动画开始位置
-        this.endPos = 0; // 动画结束位置
-        this.property = null; // 动画属性
-        this.easing = null; // 动画速度曲线
-        this.duration = null; // 动画持续时间
     }
 
     _createClass(Animate, [{
@@ -39,11 +33,9 @@ var Animate = function () {
             this.property = property; // 初始化动画属性
             this.startPos = startPos; // 初始化动画开始位置
             this.endPos = endPos; // 初始化动画结束位置
-
             this.startTime = new Date().getTime(); // 初始化动画开始时间
             this.duration = duration; // 初始化动画持续时间
             this.easing = this._Tween(easing); // 初始化动画速度曲线
-
             // 启动定时器
             var timeId = setInterval(function () {
                 // _step() 方法会在动画结束的时候返回 false
@@ -145,6 +137,8 @@ var Game = function () {
         this.duration = obj['duration'] ? obj['duration'] : 500; // 初始化动画持续时间，默认值为 500s
         this.easing = obj['easing'] ? obj['easing'] : 'linear'; // 初始化动画速度曲线，默认值为 'linear'
         this.counts = obj['counts'] ? obj['counts'] : 10; // 初始化动画循环次数，默认值为 10
+
+        this.animate = new Animate(this.dom); // 实例化 Animate 类
     }
 
     _createClass(Game, [{
@@ -153,9 +147,9 @@ var Game = function () {
             var _this2 = this;
 
             // 实例化 Animate 类并传入动画对象
-            var animate = new Animate(this.dom);
+            // const animate = new Animate(this.dom);
             // 执行动画
-            animate.run(this.property, this.startPos, this.endPos, this.duration, this.easing, function () {
+            this.animate.run(this.property, this.startPos, this.endPos, this.duration, this.easing, function () {
                 // 计数器开始计数
                 _this2.counter++;
                 // 当计数器大于或者等于动画循环次数时，停止执行动画。
@@ -163,7 +157,7 @@ var Game = function () {
                     // 计数器清零
                     _this2.counter = 0;
                     // 在最后一次动画循环中移动动画对象到结束位置
-                    animate.run(_this2.property, _this2.startPos, targetPos, 800, 'easeOut');
+                    _this2.animate.run(_this2.property, _this2.startPos, targetPos, 800, 'easeOut');
                     // 执行回调函数
                     if (callback && typeof callback === 'function') {
                         setTimeout(function () {
@@ -231,11 +225,11 @@ var VALIDATE = function () {
 */
 
 
-var App = function () {
-    function App(params) {
+var SlotMachine = function () {
+    function SlotMachine(params) {
         var _this4 = this;
 
-        _classCallCheck(this, App);
+        _classCallCheck(this, SlotMachine);
 
         // 实例化检验类
         this.validate = new VALIDATE({
@@ -269,7 +263,7 @@ var App = function () {
         this._gameInstance();
     }
 
-    _createClass(App, [{
+    _createClass(SlotMachine, [{
         key: 'run',
         value: function run(targetPosArray, callback) {
             // 检查参数
@@ -299,7 +293,7 @@ var App = function () {
         }
     }]);
 
-    return App;
+    return SlotMachine;
 }();
 
 /* 我们来模拟一次吧！
@@ -308,7 +302,7 @@ var App = function () {
 */
 
 
-var app = new App([{
+var slotmachine = new SlotMachine([{
     dom: document.getElementsByClassName('superheros-list01')[0], // 动画对象，必须
     property: 'top', // 动画属性，必需
     startPos: -60, // 动画开始位置，必需
@@ -319,13 +313,13 @@ var app = new App([{
     property: 'top',
     startPos: -60,
     endPos: -1050,
-    counts: 6
+    counts: 7
 }, {
     dom: document.getElementsByClassName('superheros-list03')[0],
     property: 'top',
     startPos: -60,
     endPos: -1050,
-    counts: 7
+    counts: 9
 }]);
 
 /* 假设[1,1,1] [2,2,2] ... [10,10,10] 是为中奖，其它不中奖
@@ -348,14 +342,14 @@ document.getElementById('start').addEventListener('click', function () {
         return 50 - item * 110;
     });
     // 传入参数，执行动画
-    app.run(prizeArray, function () {
+    slotmachine.run(prizeArray, function () {
 
         // 判断 prizeArray 内的数字是否全部相等
         var isPrize = prizeArray.some(function (item) {
             return item !== prizeArray[0];
         });
         // 反馈用户
-        isPrize === true ? alert('很抱歉，没有中奖') : alert('恭喜中奖了！你可以去买彩票了！');
+        isPrize === true ? console.log('很抱歉，没有中奖') : console.log('恭喜中奖了！你可以去买彩票了！');
         // 解锁
         window.lock = false;
     });

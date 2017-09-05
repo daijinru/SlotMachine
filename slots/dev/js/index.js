@@ -11,24 +11,16 @@
 */ 
 class Animate {
     constructor(dom) {
-        this.dom            = dom;           // 动画对象
-        this.startTime      = 0;             // 动画开始时间
-        this.startPos       = 0;             // 动画开始位置
-        this.endPos         = 0;             // 动画结束位置
-        this.property       = null;          // 动画属性
-        this.easing         = null;          // 动画速度曲线
-        this.duration       = null;          // 动画持续时间
+        this.dom            = dom;                          // 动画对象
     }
 
     run(property, startPos, endPos, duration, easing, callback) {
         this.property       = property;                     // 初始化动画属性
         this.startPos       = startPos;                     // 初始化动画开始位置
         this.endPos         = endPos;                       // 初始化动画结束位置
-
         this.startTime      = new Date().getTime();         // 初始化动画开始时间
         this.duration       = duration;                     // 初始化动画持续时间
         this.easing         = this._Tween(easing);          // 初始化动画速度曲线
-
         // 启动定时器
         const timeId = setInterval(() => {
             // _step() 方法会在动画结束的时候返回 false
@@ -120,13 +112,15 @@ class Game {
         this.duration           = obj['duration'] ? obj['duration'] : 500;  // 初始化动画持续时间，默认值为 500s
         this.easing             = obj['easing'] ? obj['easing'] : 'linear'; // 初始化动画速度曲线，默认值为 'linear'
         this.counts             = obj['counts'] ? obj['counts'] : 10;       // 初始化动画循环次数，默认值为 10
+
+        this.animate            = new Animate(this.dom);                    // 实例化 Animate 类
     }
 
     run(targetPos,callback) {
         // 实例化 Animate 类并传入动画对象
-        const animate = new Animate(this.dom);
+        // const animate = new Animate(this.dom);
         // 执行动画
-        animate.run(this.property, this.startPos, this.endPos, this.duration, this.easing, () => {
+        this.animate.run(this.property, this.startPos, this.endPos, this.duration, this.easing, () => {
             // 计数器开始计数
             this.counter++;
             // 当计数器大于或者等于动画循环次数时，停止执行动画。
@@ -134,7 +128,7 @@ class Game {
                 // 计数器清零
                 this.counter = 0;
                 // 在最后一次动画循环中移动动画对象到结束位置
-                animate.run(this.property, this.startPos, targetPos, 800, 'easeOut');
+                this.animate.run(this.property, this.startPos, targetPos, 800, 'easeOut');
                 // 执行回调函数
                 if (callback && typeof callback === 'function') {
                     setTimeout(() => {
@@ -188,7 +182,7 @@ class VALIDATE {
 /* App 类初始化动画执行的具体参数，封装调用动画的行为
 ** run() 方法是 App 类的开放接口，接受动画最终循环的结束位置和回调函数
 */ 
-class App {
+class SlotMachine {
     constructor(params) {
         // 实例化检验类
         this.validate = new VALIDATE({
@@ -251,7 +245,7 @@ class App {
 ** 实例化 App类，每一个实例都传入相关参数
 ** 通过点击事件触发 App 实例的 run() 方法
 */
-const app = new App([{
+const slotmachine = new SlotMachine([{
     dom: document.getElementsByClassName('superheros-list01')[0],   // 动画对象，必须
     property: 'top',                                                // 动画属性，必需
     startPos: -60,                                                  // 动画开始位置，必需
@@ -262,13 +256,13 @@ const app = new App([{
     property: 'top',
     startPos: -60,
     endPos: -1050,
-    counts: 6
+    counts: 7
 },{
     dom: document.getElementsByClassName('superheros-list03')[0],
     property: 'top',
     startPos: -60,
     endPos: -1050,
-    counts: 7
+    counts: 9
 }])
 
 /* 假设[1,1,1] [2,2,2] ... [10,10,10] 是为中奖，其它不中奖
@@ -291,14 +285,14 @@ document.getElementById('start').addEventListener('click',function(){
         return 50 - item * 110
     });
     // 传入参数，执行动画
-    app.run(prizeArray,function(){
+    slotmachine.run(prizeArray,function(){
 
         // 判断 prizeArray 内的数字是否全部相等
         const isPrize = prizeArray.some(item => {
             return item !== prizeArray[0]
         })
         // 反馈用户
-        isPrize === true ? alert('很抱歉，没有中奖') : alert('恭喜中奖了！你可以去买彩票了！')
+        isPrize === true ? console.log('很抱歉，没有中奖') : console.log('恭喜中奖了！你可以去买彩票了！')
         // 解锁
         window.lock = false;
     })
