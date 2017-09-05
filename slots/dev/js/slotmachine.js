@@ -34,7 +34,7 @@ class Animate {
             this._step();
         }, 20);
     }
-    
+
     _step() {
         // 获取当前时间
         const t = new Date().getTime(); 
@@ -103,22 +103,21 @@ class Animate {
 */ 
 class Game {
     constructor(obj) {
-        this.counter            = 0;                                        // 初始化计数器
-        this.dom                = obj['dom'];                               // 初始化动画对象
-        this.property           = obj['property'];                          // 初始化动画属性
-        this.startPos           = obj['startPos'];                          // 初始化动画开始位置
-        this.endPos             = obj['endPos'];                            // 初始化动画结束位置
+        this.counter            = 0;                                                // 初始化计数器
+        this.dom                = document.getElementsByClassName(obj['dom'])[0];   // 初始化动画对象
+        this.property           = obj['property'] ? obj['property'] : 'bottom';     // 初始化动画属性
+        this.startPos           = obj['startPos'];                                  // 初始化动画开始位置
+        this.endPos             = obj['endPos'];                                    // 初始化动画结束位置
 
-        this.duration           = obj['duration'] ? obj['duration'] : 500;  // 初始化动画持续时间，默认值为 500s
-        this.easing             = obj['easing'] ? obj['easing'] : 'linear'; // 初始化动画速度曲线，默认值为 'linear'
-        this.counts             = obj['counts'] ? obj['counts'] : 10;       // 初始化动画循环次数，默认值为 10
+        this.duration           = obj['duration'] ? obj['duration'] : 500;          // 初始化动画持续时间，默认值为 500s
+        this.easing             = obj['easing'] ? obj['easing'] : 'linear';         // 初始化动画速度曲线，默认值为 'linear'
+        this.counts             = obj['counts'];                                    // 初始化动画循环次数，默认值为 10
 
-        this.animate            = new Animate(this.dom);                    // 实例化 Animate 类
+        this._style();                                                              // 初始化动画对象位置
+        this.animate            = new Animate(this.dom);                            // 实例化 Animate 类
     }
 
     run(targetPos,callback) {
-        // 实例化 Animate 类并传入动画对象
-        // const animate = new Animate(this.dom);
         // 执行动画
         this.animate.run(this.property, this.startPos, this.endPos, this.duration, this.easing, () => {
             // 计数器开始计数
@@ -142,6 +141,12 @@ class Game {
             // 再次执行动画循环
             this.run(targetPos,callback);
         })
+    }
+
+     _style() {
+        // 初始化样式
+        console.log('hello')
+        this.dom.style[this.property] = this.startPos + 'px';
     }
 }
 
@@ -194,7 +199,7 @@ class SlotMachine {
         this.validate = new VALIDATE({
             params          : 'object.isRequired',
             dom             : 'object.isRequired',
-            property        : 'string.isRequired',
+            property        : 'string.notRequired',
             startPos        : 'number.isRequired',
             endPos          : 'number.isRequired',
             duration        : 'number.notRequired',
@@ -237,6 +242,7 @@ class SlotMachine {
 
     _gameInstance() {
         // 让 counts 数组长度跟 dom 长度一样，超出部分被截取，少于部分补充为 undefined
+        this.animate['counts'] = this.animate['counts'] ? this.animate['counts'] : [5,7,9];
         this.animate['counts'].length = this.dom.length;
         // 根据参数实例化 Game 并逐条压入 game 数组
         this.dom.forEach((item, index) => {
