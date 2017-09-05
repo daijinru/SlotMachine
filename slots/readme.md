@@ -5,5 +5,4 @@
 
 
 ###使用方式说明及其他
-1. webpack -w 监听编译 js
-2. gulp 打包 dev 文件夹内的 image 和 less 到 static
+> 改了代码，gulp 打包
