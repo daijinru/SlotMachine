@@ -118,10 +118,11 @@ var Animate = function () {
     return Animate;
 }();
 
-/* Game 类是对 Animate 类的进一步封装，提供动画的循环和重置，及动画结束之后的回调函数
-** run() 方法是 Game 类的开放接口
-** run() 方法接受 targetPos（最后一次循环的动画结束位置）,callback（可选）回调
-*/
+/* 
+ ** Game 类是对 Animate 类的进一步封装，提供动画的循环和重置，及动画结束之后的回调函数
+ ** run() 方法是 Game 类的开放接口
+ ** run() 方法接受 targetPos（最后一次循环的动画结束位置）,callback（可选）回调
+ */
 
 
 var Game = function () {
