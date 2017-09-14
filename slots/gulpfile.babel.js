@@ -14,7 +14,7 @@ import uglify			from 'gulp-uglify';
 const explanatoryNotes = '/*极客学院前端组*/\n';
 // 源文件地址
 const lessPath = 'dev/less/index.less';
-const jsPath = 'dev/js/*.js';
+const jsPath = 'dev/js/index.js';
 const imagePath = 'dev/image/*.+(png|jpg|gif|svg)';
 
 // 编译后路径
