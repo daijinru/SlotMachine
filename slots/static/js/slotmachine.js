@@ -1,8 +1,6 @@
 /*极客学院前端组*/
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -137,7 +135,7 @@ var Game = function () {
 
         this.duration = obj['duration'] ? obj['duration'] : 500; // 初始化动画持续时间，默认值为 500s
         this.easing = obj['easing'] ? obj['easing'] : 'linear'; // 初始化动画速度曲线，默认值为 'linear'
-        this.counts = obj['counts']; // 初始化动画循环次数，默认值为 10
+        this.counts = obj['counts'] ? obj['counts'] : 10; // 初始化动画循环次数，默认值为 10
 
         this._style(); // 初始化动画对象位置
         this.animate = new Animate(this.dom); // 实例化 Animate 类
@@ -176,7 +174,6 @@ var Game = function () {
         key: '_style',
         value: function _style() {
             // 初始化样式
-            console.log('hello');
             this.dom.style[this.property] = this.startPos + 'px';
         }
     }]);
@@ -184,52 +181,10 @@ var Game = function () {
     return Game;
 }();
 
-/* 校验类
-*/
-
-var VALIDATE = function () {
-    function VALIDATE(params) {
-        _classCallCheck(this, VALIDATE);
-
-        this.params = params;
-    }
-
-    _createClass(VALIDATE, [{
-        key: 'start',
-        value: function start(state) {
-            var _this3 = this;
-
-            //遍历校验规则
-            Object.getOwnPropertyNames(state).forEach(function (val) {
-                var stateType = _typeof(state[val]); // 当前类型
-                var propsType = _this3.params[val].split('.')[0]; // 规则类型
-                var required = _this3.params[val].split('.')[1]; // 规则参数是否必传
-                var isRequired = required === 'isRequired' ? true : false; // 验证当前参数是否必传
-                var isPropType = propsType === _typeof(state[val]) ? true : false; // 验证当前类型与规则类型是否相等
-                var errorType = val + ' type should be ' + propsType + ' but ' + stateType; // 类型错误抛出异常值
-                var errorIsQu = val + ' isRequired!\''; // 必传参数抛出类型异常值
-                // 如果该参数不存在，则跳过
-                if (!val) {
-                    return;
-                }
-                // 如果为必传参数但是没有传值
-                if (isRequired && !state[val]) {
-                    throw new Error(errorIsQu);
-                }
-                // 如果当前类型与规则类型不等
-                if (!isPropType && state[val]) {
-                    throw new Error(errorType);
-                }
-            });
-        }
-    }]);
-
-    return VALIDATE;
-}();
-
-/* SlotMachine 类初始化动画执行的具体参数，封装调用动画的行为
-** run() 方法是 其开放接口，接受动画最终循环的结束位置和回调函数
-*/
+/* 
+ ** SlotMachine 类初始化动画执行的具体参数，封装调用动画的行为
+ ** run() 方法是 其开放接口，接受动画最终循环的结束位置和回调函数
+ */
 
 
 var SlotMachine = function () {
@@ -240,125 +195,43 @@ var SlotMachine = function () {
         this.animate = params['animate']; // 动画参数
         this.game = []; // 初始化 game 数组
         this._gameInstance();
-
-        // 实例化检验类
-        this.validate = new VALIDATE({
-            params: 'object.isRequired',
-            dom: 'object.isRequired',
-            property: 'string.notRequired',
-            startPos: 'number.isRequired',
-            endPos: 'number.isRequired',
-            duration: 'number.notRequired',
-            easing: 'string.notRequired',
-            counts: 'object.notRequired',
-            callback: 'function.notRequired'
-        });
-        // 检查参数
-        this.validate.start({
-            params: params,
-            dom: this.dom,
-            property: this.animate['property'],
-            startPos: this.animate['startPos'],
-            endPos: this.animate['endPos'],
-            duration: this.animate['duration'],
-            easing: this.animate['easing'],
-            counts: this.animate['counts']
-        });
     }
 
     _createClass(SlotMachine, [{
         key: 'run',
-        value: function run(params, callback) {
-            // 检查参数
-            this.validate.start({ params: params, callback: callback });
-            // 产生 targetPos 数组
-            var prizeArray = this._prizeArray(params);
+        value: function run(targetPosArray, callback) {
             // 遍历 game 对象
-            this.game.forEach(function (item, index) {
+            this.game.forEach(function (item, index, array) {
                 // 参数转换为数组
                 // 执行最后一个对象的动画的时候，传入回调
-                if (index === prizeArray.length - 1) {
-                    item.run(prizeArray[index], function () {
+                if (index === array.length - 1) {
+                    item.run(targetPosArray[index], function () {
                         callback && typeof callback === 'function' && callback();
                     });
                     // 其他对象的动画正常执行
                 } else {
-                    item.run(prizeArray[index]);
+                    item.run(targetPosArray[index]);
                 }
             });
         }
+        // 该方法的用途是将动画对象和动画参数传到 Game 类并实例化
+
     }, {
         key: '_gameInstance',
         value: function _gameInstance() {
-            var _this4 = this;
+            var _this3 = this;
 
             // 让 counts 数组长度跟 dom 长度一样，超出部分被截取，少于部分补充为 undefined
-            this.animate['counts'] = this.animate['counts'] ? this.animate['counts'] : [5, 7, 9];
             this.animate['counts'].length = this.dom.length;
             // 根据参数实例化 Game 并逐条压入 game 数组
             this.dom.forEach(function (item, index) {
                 // 组合 dom 和 counts的单个元素 为对象
-                var dom = { dom: item, counts: _this4.animate['counts'][index] };
-                // 合并 dom 和 animate 对象
-                var array = Object.assign({}, _this4.animate, dom);
+                var dom = { dom: item, counts: _this3.animate['counts'][index] };
+                // 合并 dom 和 animate 对象，最后得出
+                var params = Object.assign({}, _this3.animate, dom);
                 // 合并后的对象传入 Game 类并实例化，存储到 this.game 数组
-                _this4.game[index] = new Game(array);
+                _this3.game[index] = new Game(params);
             });
-        }
-    }, {
-        key: '_prizeArray',
-        value: function _prizeArray(source) {
-            var isPrize = source.isPrize,
-                prize = source.prize,
-                prizeAmount = source.prizeAmount;
-            var _animate = this.animate,
-                endPos = _animate.endPos,
-                startPos = _animate.startPos;
-
-            var dom = this.dom;
-            // 判断是否中奖
-            if (isPrize === true && prize > 0 && prize <= prizeAmount) {
-                // 如果中奖，产生全相等的数组
-                var prizeNumber = [];
-                for (var i = 1; i <= this.dom.length; i++) {
-                    prizeNumber.push(prize);
-                }
-                return transformArray(prizeNumber);
-            } else {
-                // 如果没有中奖，需要产生不全相等的随机数组
-                return transformArray(randomArray());
-            }
-
-            function transformArray(array) {
-                // 根据动画位置最大值和最小值，以及奖品数量计算间隔值，因此最大值，最小值和奖品数量是相关的。
-                var interval = (endPos - startPos) / (prizeAmount - 1);
-                // 转换奖品数组为动画对象最后循环的运动距离
-                return array.map(function (item) {
-                    return startPos + interval * (item - 1);
-                });
-            }
-
-            function randomArray() {
-                // 产生元素都在1 ~ prizeAmount
-                var sourceArray = [];
-                for (var _i = 1; _i <= dom.length; _i++) {
-                    sourceArray.push(prizeAmount);
-                }
-                // 产生随机值
-                sourceArray = sourceArray.map(function (item) {
-                    return Math.floor(Math.random() * (item - 1) + 1);
-                });
-                // 不幸产生了全相等的数组，如果有一个不相等，则返回 true
-                var notEqual = sourceArray.some(function (item) {
-                    return item !== sourceArray[0];
-                });
-                // 如果 notEqual === true，返回 sourceArray;
-                if (notEqual) {
-                    return sourceArray;
-                } else {
-                    return randomArray();
-                }
-            }
         }
     }]);
 

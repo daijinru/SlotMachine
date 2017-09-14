@@ -112,7 +112,7 @@ class Game {
 
         this.duration           = obj['duration'] ? obj['duration'] : 500;          // 初始化动画持续时间，默认值为 500s
         this.easing             = obj['easing'] ? obj['easing'] : 'linear';         // 初始化动画速度曲线，默认值为 'linear'
-        this.counts             = obj['counts'];                                    // 初始化动画循环次数，默认值为 10
+        this.counts             = obj['counts'] ? obj['counts'] : 10;               // 初始化动画循环次数，默认值为 10
 
         this._style();                                                              // 初始化动画对象位置
         this.animate            = new Animate(this.dom);                            // 实例化 Animate 类
@@ -146,42 +146,7 @@ class Game {
 
      _style() {
         // 初始化样式
-        console.log('hello')
         this.dom.style[this.property] = this.startPos + 'px';
-    }
-}
-
-/* 
- **校验类
- */ 
-class VALIDATE {
-    constructor(params) {
-        this.params = params;
-    }
-
-    start(state) {
-        //遍历校验规则
-        Object.getOwnPropertyNames(state).forEach(val => {                              
-            let stateType  = typeof state[val];                                         // 当前类型
-            let propsType  = this.params[val].split('.')[0];                            // 规则类型
-            let required   = this.params[val].split('.')[1];                            // 规则参数是否必传
-            let isRequired = required  === 'isRequired'           ? true : false;       // 验证当前参数是否必传
-            let isPropType = propsType === typeof state[val] ? true : false;            // 验证当前类型与规则类型是否相等
-            let errorType  = `${val} type should be ${propsType} but ${stateType}`;     // 类型错误抛出异常值
-            let errorIsQu  = `${val} isRequired!'`;                                     // 必传参数抛出类型异常值
-            // 如果该参数不存在，则跳过
-            if (!val) {
-                return
-            }
-            // 如果为必传参数但是没有传值
-            if(isRequired  && !state[val]){                                    
-                throw new Error (errorIsQu);
-            }
-            // 如果当前类型与规则类型不等
-            if(!isPropType && state[val]){  
-                throw new Error (errorType);
-            }
-        });
     }
 }
 
@@ -191,118 +156,39 @@ class VALIDATE {
  */ 
 class SlotMachine {
     constructor(params) {
-
         this.dom        = params['dom'];        // 动画对象（数组）
         this.animate    = params['animate'];    // 动画参数
         this.game       = [];                   // 初始化 game 数组
-        this._gameInstance();
-
-        // 实例化检验类
-        this.validate = new VALIDATE({
-            params          : 'object.isRequired',
-            dom             : 'object.isRequired',
-            property        : 'string.notRequired',
-            startPos        : 'number.isRequired',
-            endPos          : 'number.isRequired',
-            duration        : 'number.notRequired',
-            easing          : 'string.notRequired',
-            counts          : 'object.notRequired',
-            callback        : 'function.notRequired',
-        })
-        // 检查参数
-        this.validate.start({
-            params          : params,
-            dom             : this.dom,
-            property        : this.animate['property'],
-            startPos        : this.animate['startPos'],
-            endPos          : this.animate['endPos'],
-            duration        : this.animate['duration'],
-            easing          : this.animate['easing'],
-            counts          : this.animate['counts']
-        })
+        this._gameInstance();                   
     }
 
-    run(params,callback) {
-        // 检查参数
-        this.validate.start({params,callback});
-        // 产生 targetPos 数组
-        const prizeArray = this._prizeArray(params);
+    run(targetPosArray,callback) {
         // 遍历 game 对象
-        this.game.forEach((item, index) => {
+        this.game.forEach((item, index, array) => {
             // 参数转换为数组
             // 执行最后一个对象的动画的时候，传入回调
-            if (index === (prizeArray.length - 1)) {
-                item.run(prizeArray[index], () => {
+            if (index === (array.length - 1)) {
+                item.run(targetPosArray[index], () => {
                     callback && typeof callback === 'function' && callback();
                 })
             // 其他对象的动画正常执行
             } else {
-                item.run(prizeArray[index]);
+                item.run(targetPosArray[index]);
             }
         })
     }
-
+    // 该方法的用途是将动画对象和动画参数传到 Game 类并实例化
     _gameInstance() {
         // 让 counts 数组长度跟 dom 长度一样，超出部分被截取，少于部分补充为 undefined
-        this.animate['counts'] = this.animate['counts'] ? this.animate['counts'] : [5,7,9];
         this.animate['counts'].length = this.dom.length;
         // 根据参数实例化 Game 并逐条压入 game 数组
         this.dom.forEach((item, index) => {
             // 组合 dom 和 counts的单个元素 为对象
-            const dom = {dom:item,counts:this.animate['counts'][index]};
-            // 合并 dom 和 animate 对象
-            const array = Object.assign({}, this.animate, dom);
+            const dom = {dom:item, counts:this.animate['counts'][index]};
+            // 合并 dom 和 animate 对象，最后得出
+            const params = Object.assign({}, this.animate, dom);
             // 合并后的对象传入 Game 类并实例化，存储到 this.game 数组
-            this.game[index] = new Game(array);
+            this.game[index] = new Game(params);
         })
-    }
-
-    _prizeArray(source) {
-        const { isPrize, prize, prizeAmount } = source;
-        const { endPos, startPos } = this.animate;
-        const dom = this.dom;
-        // 判断是否中奖
-        if (isPrize === true && prize > 0 && prize <= prizeAmount) {
-            // 如果中奖，产生全相等的数组
-            const prizeNumber = [];
-            for (let i = 1;i <= this.dom.length;i ++) {
-                prizeNumber.push(prize);
-            }
-            return transformArray(prizeNumber)
-        } else {
-            // 如果没有中奖，需要产生不全相等的随机数组
-            return transformArray(randomArray())
-        }
-
-        function transformArray(array) {
-            // 根据动画位置最大值和最小值，以及奖品数量计算间隔值，因此最大值，最小值和奖品数量是相关的。
-            const interval = (endPos - startPos)/(prizeAmount - 1);
-            // 转换奖品数组为动画对象最后循环的运动距离
-            return array.map(item => {
-                return (startPos + interval * (item - 1))
-            })
-        }
-
-        function randomArray() {
-            // 产生元素都在1 ~ prizeAmount
-            let sourceArray = [];
-            for (let i = 1;i <= dom.length;i ++) {
-                sourceArray.push(prizeAmount);
-            }
-            // 产生随机值
-            sourceArray = sourceArray.map(item => {
-                return Math.floor(Math.random() * (item - 1) + 1)
-            })
-            // 不幸产生了全相等的数组，如果有一个不相等，则返回 true
-            const notEqual = sourceArray.some(item => {
-                return item !== sourceArray[0]
-            })
-            // 如果 notEqual === true，返回 sourceArray;
-            if (notEqual) {
-                return sourceArray
-            } else {
-                return randomArray()
-            }
-        }
     }
 }
