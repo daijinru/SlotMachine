@@ -256,7 +256,6 @@ class SlotMachine {
             this.game[index] = new Game(array);
         })
     }
-<<<<<<< HEAD:slots/dev/js/slotmachine.js
 
     _prizeArray(source) {
         const { isPrize, prize, prizeAmount } = source;
@@ -307,72 +306,3 @@ class SlotMachine {
         }
     }
 }
-=======
-}
-
-/* 我们来模拟一次吧！
-** 实例化 App类，每一个实例都传入相关参数
-** 通过点击事件触发 App 实例的 run() 方法
-*/
-const slotmachine = new SlotMachine([{
-    dom: document.getElementsByClassName('superheros-list01')[0],   // 动画对象，必须
-    property: 'top',                                                // 动画属性，必需
-    startPos: -60,                                                  // 动画开始位置，必需
-    endPos: -1050,                                                  // 动画终止的位置，必需
-    counts: 5                                                       // 动画循环次数，非必需
-},{
-    dom: document.getElementsByClassName('superheros-list02')[0],
-    property: 'top',
-    startPos: -60,
-    endPos: -1050,
-    counts: 7
-},{
-    dom: document.getElementsByClassName('superheros-list03')[0],
-    property: 'top',
-    startPos: -60,
-    endPos: -1050,
-    counts: 9
-}])
-
-/* 假设[1,1,1] [2,2,2] ... [10,10,10] 是为中奖，其它不中奖
-** 因此需要对抽奖序列号进行滑动距离的换算，例如在这个例子当中将 [1,1,1] 换算成 [-60,-60,-60];两个抽奖结果之间相距 110
-*/ 
-
-// 设定一个锁，避免重复触发动画
-window.lock = false;
-document.getElementById('start').addEventListener('click',function(){
-    if (window.lock) return;
-    // 加锁
-    window.lock = true;
-    // 模拟一次随机数组
-    const sourceArray = [10,10,10].map(item => {
-        // 避免出现为 0 的情况，Math.random() * (max - min) + min
-        return Math.floor(Math.random() * (item - 1) + 1)
-    });
-    // 转换 sourceArray 数组为动画对象最终循环的位置
-    const prizeArray = sourceArray.map(item => {
-        return 50 - item * 110
-    });
-    // 传入参数，执行动画
-    slotmachine.run(prizeArray,function(){
-
-        // 判断 prizeArray 内的数字是否全部相等
-        const isPrize = prizeArray.some(item => {
-            return item !== prizeArray[0]
-        })
-        // 反馈用户
-        isPrize === true ? console.log('很抱歉，没有中奖') : console.log('恭喜中奖了！你可以去买彩票了！')
-        // 解锁
-        window.lock = false;
-    })
-})
-
-
-
-
-
-
-
-
-
->>>>>>> parent of d4ca784... 使用示例:slots/dev/js/index.js
