@@ -3,6 +3,10 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 /* 极客前端出品
@@ -24,43 +28,41 @@ var Animate = function () {
     }
 
     _createClass(Animate, [{
-        key: 'run',
-        value: function run(property, startPos, endPos, duration, easing, callback) {
+        key: 'start',
+        value: function start(property, startPos, endPos, duration, easing, callback) {
             var _this = this;
 
-            this.property = property; // 初始化动画属性
-            this.startPos = startPos; // 初始化动画开始位置
-            this.endPos = endPos; // 初始化动画结束位置
-            this.startTime = new Date().getTime(); // 初始化动画开始时间
-            this.duration = duration; // 初始化动画持续时间
-            this.easing = this._Tween(easing); // 初始化动画速度曲线
+            // 初始化动画速度曲线
+            easing = this._Tween(easing);
+            // 动画开始时间
+            var startTime = new Date().getTime();
             // 启动定时器
             var timeId = setInterval(function () {
                 // _step() 方法会在动画结束的时候返回 false
-                if (_this._step() === false) {
+                if (_this._step(startTime, property, startPos, endPos, duration, easing) === false) {
                     // 清除定时器
                     clearInterval(timeId);
                     // 执行回调函数
                     callback && typeof callback === 'function' && callback();
                 }
                 // 每隔20毫秒执行 _step() 方法，如果时间越大，则动画帧数越小，因此不宜过大
-                _this._step();
+                _this._step(startTime, property, startPos, endPos, duration, easing);
             }, 20);
         }
     }, {
         key: '_step',
-        value: function _step() {
+        value: function _step(startTime, property, startPos, endPos, duration, easing) {
             // 获取当前时间
             var t = new Date().getTime();
             // 当前时间大于动画开始时间加上动画持续时间之和
-            if (t >= this.startTime + this.duration) {
+            if (t >= startTime + duration) {
                 // 最后一次修正动画对象的位置
-                this._update(this.endPos);
+                this._update(endPos);
                 // 结束动画
                 return false;
             }
             // 获取动画速度曲线返回的值
-            var pos = this.easing(t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration);
+            var pos = easing(t - startTime, startPos, endPos - startPos, duration);
             // 更新动画对象位置 
             this._update(pos);
         }
@@ -123,39 +125,44 @@ var Animate = function () {
  */
 
 
-var Game = function () {
+var Game = function (_Animate) {
+    _inherits(Game, _Animate);
+
     function Game(obj) {
         _classCallCheck(this, Game);
 
-        this.counter = 0; // 初始化计数器
-        this.dom = document.getElementsByClassName(obj['dom'])[0]; // 初始化动画对象
-        this.property = obj['property'] ? obj['property'] : 'bottom'; // 初始化动画属性
-        this.startPos = obj['startPos']; // 初始化动画开始位置
-        this.endPos = obj['endPos']; // 初始化动画结束位置
+        // 调用父类的 constructor 方法
 
-        this.duration = obj['duration'] ? obj['duration'] : 500; // 初始化动画持续时间，默认值为 500s
-        this.easing = obj['easing'] ? obj['easing'] : 'linear'; // 初始化动画速度曲线，默认值为 'linear'
-        this.counts = obj['counts'] ? obj['counts'] : 10; // 初始化动画循环次数，默认值为 10
+        var _this2 = _possibleConstructorReturn(this, (Game.__proto__ || Object.getPrototypeOf(Game)).call(this, document.getElementsByClassName(obj['dom'])[0]));
 
-        this._style(); // 初始化动画对象位置
-        this.animate = new Animate(this.dom); // 实例化 Animate 类
+        _this2.dom = document.getElementsByClassName(obj['dom'])[0]; // 初始化动画对象
+        _this2.counter = 0; // 初始化计数器
+        _this2.property = obj['property'] ? obj['property'] : 'bottom'; // 初始化动画属性
+        _this2.startPos = obj['startPos']; // 初始化动画开始位置
+        _this2.endPos = obj['endPos']; // 初始化动画结束位置
+        _this2.duration = obj['duration'] ? obj['duration'] : 500; // 初始化动画持续时间，默认值为 500s
+        _this2.easing = obj['easing'] ? obj['easing'] : 'linear'; // 初始化动画速度曲线，默认值为 'linear'
+        _this2.counts = obj['counts'] ? obj['counts'] : 10; // 初始化动画循环次数，默认值为 10
+
+        _this2._style(); // 初始化动画对象位置
+        return _this2;
     }
 
     _createClass(Game, [{
         key: 'run',
         value: function run(targetPos, callback) {
-            var _this2 = this;
+            var _this3 = this;
 
             // 执行动画
-            this.animate.run(this.property, this.startPos, this.endPos, this.duration, this.easing, function () {
+            this.start(this.property, this.startPos, this.endPos, this.duration, this.easing, function () {
                 // 计数器开始计数
-                _this2.counter++;
+                _this3.counter++;
                 // 当计数器大于或者等于动画循环次数时，停止执行动画。
-                if (_this2.counter >= _this2.counts) {
+                if (_this3.counter >= _this3.counts) {
                     // 计数器清零
-                    _this2.counter = 0;
+                    _this3.counter = 0;
                     // 在最后一次动画循环中移动动画对象到结束位置
-                    _this2.animate.run(_this2.property, _this2.startPos, targetPos, 800, 'easeOut');
+                    _this3.start(_this3.property, _this3.startPos, targetPos, 800, 'easeOut');
                     // 执行回调函数
                     if (callback && typeof callback === 'function') {
                         setTimeout(function () {
@@ -165,9 +172,9 @@ var Game = function () {
                     return false;
                 };
                 // 在每一次动画循环最后重置动画对象到开始位置
-                _this2.dom.style[_this2.property] = _this2.startPos + 'px';
+                _this3.dom.style[_this3.property] = _this3.startPos + 'px';
                 // 再次执行动画循环
-                _this2.run(targetPos, callback);
+                _this3.run(targetPos, callback);
             });
         }
     }, {
@@ -179,7 +186,7 @@ var Game = function () {
     }]);
 
     return Game;
-}();
+}(Animate);
 
 /* 
  ** SlotMachine 类初始化动画执行的具体参数，封装调用动画的行为
@@ -219,18 +226,18 @@ var SlotMachine = function () {
     }, {
         key: '_gameInstance',
         value: function _gameInstance() {
-            var _this3 = this;
+            var _this4 = this;
 
             // 让 counts 数组长度跟 dom 长度一样，超出部分被截取，少于部分补充为 undefined
             this.animate['counts'].length = this.dom.length;
             // 根据参数实例化 Game 并逐条压入 game 数组
             this.dom.forEach(function (item, index) {
                 // 组合 dom 和 counts的单个元素 为对象
-                var dom = { dom: item, counts: _this3.animate['counts'][index] };
+                var dom = { dom: item, counts: _this4.animate['counts'][index] };
                 // 合并 dom 和 animate 对象，最后得出
-                var params = Object.assign({}, _this3.animate, dom);
+                var params = Object.assign({}, _this4.animate, dom);
                 // 合并后的对象传入 Game 类并实例化，存储到 this.game 数组
-                _this3.game[index] = new Game(params);
+                _this4.game[index] = new Game(params);
             });
         }
     }]);

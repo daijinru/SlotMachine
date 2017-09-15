@@ -11,42 +11,40 @@
 */ 
 class Animate {
     constructor(dom) {
-        this.dom            = dom;                          // 动画对象
+        this.dom            = dom;                     // 动画对象
     }
 
-    run(property, startPos, endPos, duration, easing, callback) {
-        this.property       = property;                     // 初始化动画属性
-        this.startPos       = startPos;                     // 初始化动画开始位置
-        this.endPos         = endPos;                       // 初始化动画结束位置
-        this.startTime      = new Date().getTime();         // 初始化动画开始时间
-        this.duration       = duration;                     // 初始化动画持续时间
-        this.easing         = this._Tween(easing);          // 初始化动画速度曲线
+    start(property, startPos, endPos, duration, easing, callback) {
+        // 初始化动画速度曲线
+        easing          = this._Tween(easing);
+        // 动画开始时间
+        let startTime   = new Date().getTime();
         // 启动定时器
         const timeId = setInterval(() => {
             // _step() 方法会在动画结束的时候返回 false
-            if (this._step() === false) {
+            if (this._step(startTime, property, startPos, endPos, duration, easing) === false) {
                 // 清除定时器
                 clearInterval(timeId);
                 // 执行回调函数
                 callback && typeof callback === 'function' && callback();
             }
             // 每隔20毫秒执行 _step() 方法，如果时间越大，则动画帧数越小，因此不宜过大
-            this._step();
+            this._step(startTime, property, startPos, endPos, duration, easing);
         }, 20);
     }
 
-    _step() {
+    _step(startTime, property, startPos, endPos, duration, easing) {
         // 获取当前时间
         const t = new Date().getTime(); 
         // 当前时间大于动画开始时间加上动画持续时间之和
-        if (t >= this.startTime + this.duration) { 
+        if (t >= startTime + duration) { 
             // 最后一次修正动画对象的位置
-            this._update(this.endPos); 
+            this._update(endPos); 
             // 结束动画
             return false; 
         }
         // 获取动画速度曲线返回的值
-        const pos = this.easing(t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration);
+        const pos = easing(t - startTime, startPos, endPos - startPos, duration);
         // 更新动画对象位置 
         this._update(pos); 
     }
@@ -102,25 +100,25 @@ class Animate {
  ** run() 方法是 Game 类的开放接口
  ** run() 方法接受 targetPos（最后一次循环的动画结束位置）,callback（可选）回调
  */ 
-class Game {
+class Game extends Animate{
     constructor(obj) {
+        super(document.getElementsByClassName(obj['dom'])[0]);                      // 调用父类的 constructor 方法
+
+        this.dom                = document.getElementsByClassName(obj['dom'])[0]    // 初始化动画对象
         this.counter            = 0;                                                // 初始化计数器
-        this.dom                = document.getElementsByClassName(obj['dom'])[0];   // 初始化动画对象
         this.property           = obj['property'] ? obj['property'] : 'bottom';     // 初始化动画属性
         this.startPos           = obj['startPos'];                                  // 初始化动画开始位置
         this.endPos             = obj['endPos'];                                    // 初始化动画结束位置
-
         this.duration           = obj['duration'] ? obj['duration'] : 500;          // 初始化动画持续时间，默认值为 500s
         this.easing             = obj['easing'] ? obj['easing'] : 'linear';         // 初始化动画速度曲线，默认值为 'linear'
         this.counts             = obj['counts'] ? obj['counts'] : 10;               // 初始化动画循环次数，默认值为 10
 
         this._style();                                                              // 初始化动画对象位置
-        this.animate            = new Animate(this.dom);                            // 实例化 Animate 类
     }
 
     run(targetPos,callback) {
         // 执行动画
-        this.animate.run(this.property, this.startPos, this.endPos, this.duration, this.easing, () => {
+        this.start(this.property, this.startPos, this.endPos, this.duration, this.easing, () => {
             // 计数器开始计数
             this.counter++;
             // 当计数器大于或者等于动画循环次数时，停止执行动画。
@@ -128,7 +126,7 @@ class Game {
                 // 计数器清零
                 this.counter = 0;
                 // 在最后一次动画循环中移动动画对象到结束位置
-                this.animate.run(this.property, this.startPos, targetPos, 800, 'easeOut');
+                this.start(this.property, this.startPos, targetPos, 800, 'easeOut');
                 // 执行回调函数
                 if (callback && typeof callback === 'function') {
                     setTimeout(() => {

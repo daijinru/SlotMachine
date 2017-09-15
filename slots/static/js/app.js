@@ -23,7 +23,7 @@ var slotmachine = new SlotMachine({
 // 这里不在老虎机内部实现中奖序列号换算的原因在于你们要写的老虎机可能都不一样，那么老虎机动画停下来的位置也不一样，不如让用户自行计算。
 // 这是一个中奖结果换算后的坐标位置
 window.lock = false;
-var prizeArray = [-940, -830, -610];
+var prizeArray = [-940, -940, -940];
 
 document.getElementById('start').addEventListener('click', function () {
     // 这里应该添加锁，避免在动画运行的时候重复触发
