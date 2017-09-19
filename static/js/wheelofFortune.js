@@ -5,9 +5,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var TWEEN = function TWEEN(startTime, startPosition, endPosition, duration, easing) {
-
-	return _Tween(easing)(startTime, startPosition, endPosition - startPosition, duration);
+var TWEEN = function TWEEN(easing) {
 	/**
   * [Tween description]
   * @return 	{function} 	_tween['easing']	返回函数
@@ -17,24 +15,22 @@ var TWEEN = function TWEEN(startTime, startPosition, endPosition, duration, easi
   * @param 	{number} 	c 					终点位置
   * @param 	{number} 	d 					持续时间，在使用 requestAnimationFrame 情况下，60*d/s
   */
-	function _Tween(easing) {
-		var fns = {
-			linear: function linear(t, b, c, d) {
-				return c * t / d + b;
-			},
-			easeIn: function easeIn(t, b, c, d) {
-				return c * (t /= d) * t + b;
-			},
-			easeOut: function easeOut(t, b, c, d) {
-				return -c * (t /= d) * (t - 2) + b;
-			},
-			easeInOut: function easeInOut(t, b, c, d) {
-				if ((t /= d / 2) < 1) return c / 2 * t * t + b;
-				return -c / 2 * (--t * (t - 2) - 1) + b;
-			}
-		};
-		return fns[easing];
-	}
+	var _Tween = {
+		linear: function linear(t, b, c, d) {
+			return c * t / d + b;
+		},
+		easeIn: function easeIn(t, b, c, d) {
+			return c * (t /= d) * t + b;
+		},
+		easeOut: function easeOut(t, b, c, d) {
+			return -c * (t /= d) * (t - 2) + b;
+		},
+		easeInOut: function easeInOut(t, b, c, d) {
+			if ((t /= d / 2) < 1) return c / 2 * t * t + b;
+			return -c / 2 * (--t * (t - 2) - 1) + b;
+		}
+	};
+	return _Tween[easing];
 };
 
 var WheelofFortune = function () {
@@ -45,8 +41,8 @@ var WheelofFortune = function () {
 		this.counts = params['counts']; // 动画循环次数
 		this.total = params['total']; // 奖品总数
 		this.duration = params['duration']; // 动画持续时长
-		this.easing = params['easing'] ? params['easing'] : 'easeInOut'; // 动画速度曲率
-		this.callback = params['callback'] ? params['callback'] : null; // 回调函数
+		this.easing = TWEEN(params['easing'] || 'easeInOut'); // 动画速度曲率
+		this.callback = params['callback'] || null; // 回调函数
 
 		this.startTime = 0; // 计数器,每秒递增60次
 		this.startPosition = 0; // 动画开始位置
@@ -82,7 +78,7 @@ var WheelofFortune = function () {
     */
 			this.endPosition = this.cycle * (this.counts - 1) + this.prize * this.quantity - (this.prize - 1) * this.quantity;
 			// 计算每帧动画所在位置并执行
-			this.rotate = TWEEN(this.startTime, this.startPosition, this.endPosition, this.duration, this.easing);
+			this.rotate = this._easing();
 			// 开始计数，每帧动画 + 1
 			this.startTime = this.startTime + 1;
 			// 当计数达到限制时长的时候
@@ -102,6 +98,11 @@ var WheelofFortune = function () {
 				// 执行回调
 				this.callback && typeof this.callback === 'function' && this.callback(this.prize);
 			}
+		}
+	}, {
+		key: '_easing',
+		value: function _easing() {
+			return this.easing(this.startTime, this.startPosition, this.endPosition, this.duration);
 		}
 	}, {
 		key: 'rotate',
