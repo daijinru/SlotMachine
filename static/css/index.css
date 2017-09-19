@@ -24,7 +24,7 @@
   border: 0;
   outline: 0;
 }
-.superheros {
+.slots-container .superheros {
   width: 355px;
   height: 210px;
   position: absolute;
@@ -36,22 +36,22 @@
   overflow: hidden;
   background: -webkit-linear-gradient(top, #2d2d2d 0, #fff 50%, #2d2d2d 100%);
 }
-.superheros-list01,
-.superheros-list02,
-.superheros-list03 {
+.slots-container .superheros-list01,
+.slots-container .superheros-list02,
+.slots-container .superheros-list03 {
   width: 110px;
   position: absolute;
   left: 0;
 }
-.superheros-list01 img,
-.superheros-list02 img,
-.superheros-list03 img {
+.slots-container .superheros-list01 img,
+.slots-container .superheros-list02 img,
+.slots-container .superheros-list03 img {
   display: block;
   width: 100%;
 }
-.superheros-list02 {
+.slots-container .superheros-list02 {
   left: 123px;
 }
-.superheros-list03 {
+.slots-container .superheros-list03 {
   left: 245px;
 }

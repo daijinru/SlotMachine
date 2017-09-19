@@ -15,7 +15,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 ** email : jeocat@163.com
 */
 
-/* Animate 类实现了一个对象从某个位置到目的位置的动画过渡效果
+/* 
+** Animate 类实现了一个对象从某个位置到目的位置的动画过渡效果
 ** run() 方法是 Animate 类的开放接口
 ** run() 方法接受 property,startPos,endPos,duration,easing,callback(可选)，并初始化相关参数，通过定时器执行 _step() 方法
 ** _step() 方法，每次执行都会调用 _update() 方法更新动画对象的位置，可以理解为动画帧
