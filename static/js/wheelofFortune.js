@@ -8,12 +8,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var TWEEN = function TWEEN(easing) {
     /**
      * [Tween description]
-     * @return 	{function} 	_tween['easing'] 	返回函数
-     * @param 	{string} 	easing 	动画曲线
-     * @param 	{number} 	t 	当前时间
-     * @param 	{number} 	b 	开始位置
-     * @param 	{number} 	c 	终点位置 	
-     * @param 	{number} 	d 	持续时间，在使用 requestAnimationFrame 情况下，60*d/s
+     * @return 	{function} 	_tween['easing']    返回函数
+     * @param 	{string} 	easing 	            动画曲线
+     * @param 	{number} 	t                   当前时间
+     * @param 	{number} 	b                   开始位置
+     * @param 	{number} 	c                   终点位置 	
+     * @param 	{number} 	d                   持续时间，在使用 requestAnimationFrame 情况下，60*d/s
      */
     var _Tween = {
         linear: function linear(t, b, c, d) {
