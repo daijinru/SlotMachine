@@ -55,3 +55,29 @@
 .slots-container .superheros-list03 {
   left: 245px;
 }
+.wheel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+}
+.wheel-turntable {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  background: url('../image/turntable.png') center no-repeat;
+  background-size: cover;
+}
+.wheel-button {
+  z-index: 2;
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 103px;
+  height: 123px;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  background: url('../image/turnbtn.png') center no-repeat;
+  background-size: cover;
+}

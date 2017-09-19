@@ -9,12 +9,6 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/* 极客前端出品
-** name  : 超级英雄老虎机
-** author: 戴锦如
-** email : jeocat@163.com
-*/
-
 /* 
 ** Animate 类实现了一个对象从某个位置到目的位置的动画过渡效果
 ** run() 方法是 Animate 类的开放接口

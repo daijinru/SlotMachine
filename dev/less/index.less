@@ -54,3 +54,30 @@
         }
     }
 }
+
+.wheel {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    &-turntable {
+        position: relative;
+        width: 500px;
+        height: 500px;
+        background: url('../image/turntable.png') center no-repeat;
+        background-size: cover;
+    }
+
+    &-button {
+        z-index: 2;
+        position: absolute;
+        left: 50%;
+        top: 48%;
+        width: 103px;
+        height: 123px;
+        transform: translate(-50%, -50%);
+        background: url('../image/turnbtn.png') center no-repeat;
+        background-size: cover;
+    }
+}
