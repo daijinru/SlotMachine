@@ -81,3 +81,48 @@
         background-size: cover;
     }
 }
+
+.scratch {
+    display: inline-block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); // border: 5px solid #333;
+    border-radius: 5px;
+    font-size: 0;
+
+    &-card {
+        display: inline-block;
+        width: 200px;
+        height: 50px;
+    }
+
+    &-change {
+        height: 20px;
+        margin-top: 10px;
+        font-size: 0;
+
+        input {
+            display: inline-block;
+            width: 120px;
+            height: 20px;
+            vertical-align: top;
+            border: 1px solid #666;
+            line-height: 48px;
+            padding-left: 10px;
+        }
+
+        button {
+            vertical-align: top;
+            display: inline-block;
+            width: 70px;
+            height: 24px;
+            margin-left: 10px;
+            background: #666;
+            background: #999;
+            font-size: 12px;
+            border:0;
+            color:#fff;
+        }
+    }
+}

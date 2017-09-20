@@ -81,3 +81,44 @@
   background: url('../image/turnbtn.png') center no-repeat;
   background-size: cover;
 }
+.scratch {
+  display: inline-block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  border-radius: 5px;
+  font-size: 0;
+}
+.scratch-card {
+  display: inline-block;
+  width: 200px;
+  height: 50px;
+}
+.scratch-change {
+  height: 20px;
+  margin-top: 10px;
+  font-size: 0;
+}
+.scratch-change input {
+  display: inline-block;
+  width: 120px;
+  height: 20px;
+  vertical-align: top;
+  border: 1px solid #666;
+  line-height: 48px;
+  padding-left: 10px;
+}
+.scratch-change button {
+  vertical-align: top;
+  display: inline-block;
+  width: 70px;
+  height: 24px;
+  margin-left: 10px;
+  background: #666;
+  background: #999;
+  font-size: 12px;
+  border: 0;
+  color: #fff;
+}
