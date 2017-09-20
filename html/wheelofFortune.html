@@ -33,18 +33,17 @@
             console.log('中了' + prize + '等奖');
         }
     })
-
-    let turnCount = 1;
-
+    /**
+     * 实例有两个方法 wheelofFortune.move(param: number) wheelofFortune.start()
+     * move() 设置终点位置，实例会将其转化为角度
+     * start() 执行动画
+     */
     document.getElementById('turnButton').addEventListener('click', function() {
-        wheelofFortune.move(turnCount);
-        turnCount++;
+        // 设定终点，因为有9份礼品，因此传入参数值从1到9
+        wheelofFortune.move(Math.round(Math.random()*8 + 1));
+        // 执行动画
         wheelofFortune.start();
     })
-
-    function log(t) {
-        console.log(t);
-    }
     </script>
 </body>
 

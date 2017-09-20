@@ -52,19 +52,22 @@ var WheelofFortune = function () {
         this.endPosition = 0; // 转盘动画停止位置
 
         this.cachePosition = 0; // 缓存上一次位置
+        this.prize = 0; // 奖品序列
     }
 
     _createClass(WheelofFortune, [{
         key: 'move',
         value: function move(prize) {
-            // 设置奖品序列所在的角度
-            this.prize = prize;
             /**
              * 现实中的转盘每次转动都是从它停下的位置开始
-             * 为了让转盘转动到目标位置，需要将换算后的角度减去上一次它停下的位置
+             * 为了让转盘转动到目标位置，需要将换算后的角度减去上一次它停下的位置，第一次即 cachePosition 等于 0 的时候不需要计算。
              * (总圈数 - 1) * 360 + 奖品序列号 * 单份奖品角度 - 修正度数 = 最终停止角度
              */
-            this.endPosition = this.cycle * (this.counts - 1) + this.prize * this.quantity - (this.prize - 1) * this.quantity;
+            var fixPosition = this.cachePosition > 0 ? this.prize * this.quantity : 0;
+            // 设置奖品序列号
+            this.prize = prize;
+            // 计算对应奖品所在的位置
+            this.endPosition = (this.counts - 1) * this.cycle + this.prize * this.quantity - fixPosition;
         }
     }, {
         key: 'start',
